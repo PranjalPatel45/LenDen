@@ -32,9 +32,9 @@ class ExpenseTile extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: AppColors.white.withValues(alpha: 0.62),
+          color: AppColors.white.withValues(alpha: 0.88),
           border: Border.all(
-            color: AppColors.primaryText.withValues(alpha: 0.07),
+            color: AppColors.primaryText.withValues(alpha: 0.08),
           ),
           boxShadow: [
             BoxShadow(

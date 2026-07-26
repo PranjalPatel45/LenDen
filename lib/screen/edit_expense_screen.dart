@@ -87,7 +87,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
             selectedType: _selectedType,
             allowedTypes: _allowedTypes,
             currencySymbol: _currencySymbol,
-            typeItemTextColor: AppColors.black,
+            typeItemTextColor: AppColors.primaryText,
             onTypeChanged: (value) => setState(() => _selectedType = value),
             onDateTap: () async {
               final pickedDate = await showDatePicker(

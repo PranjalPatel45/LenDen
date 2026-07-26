@@ -35,13 +35,11 @@ class ExpenseSummaryCard extends StatelessWidget {
 
     return EntranceMotion(
       child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 18, 16, 10),
-        constraints: const BoxConstraints(maxHeight: 320),
+        margin: const EdgeInsets.fromLTRB(16, 14, 16, 10),
         child: GlassCard(
-          radius: 18,
+          radius: 20,
           padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
-          child: SingleChildScrollView(
-            child: Column(
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -218,7 +216,6 @@ class ExpenseSummaryCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
         ),
       ),
     );

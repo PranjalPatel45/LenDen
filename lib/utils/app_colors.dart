@@ -232,8 +232,8 @@ class AppColors {
   );
 
   // ---- Liquid Glass derived surfaces ----
-  static const double _glassAlpha = 0.14;
-  static const double _glassBorderAlpha = 0.26;
+  static const double _glassAlpha = 0.20;
+  static const double _glassBorderAlpha = 0.35;
 
   // Off-white frosted glass base
   static final Color glassLight = background.withValues(alpha: _glassAlpha);
@@ -241,21 +241,21 @@ class AppColors {
   // Subtle border color (derived from existing palette)
   static final Color glassBorder = primary.withValues(alpha: _glassBorderAlpha);
 
-  // Glass surfaces
-  static final Color glassCard = background.withValues(alpha: 0.72);
-  static final Color glassCardBorder = primary.withValues(alpha: 0.28);
-  static final Color glassSheet = background.withValues(alpha: 0.82);
-  static final Color glassInputFill = white.withValues(alpha: 0.55);
-  static final Color glassNav = white.withValues(alpha: 0.72);
+  // Glass surfaces optimized for high contrast & premium readability
+  static final Color glassCard = background.withValues(alpha: 0.85);
+  static final Color glassCardBorder = primary.withValues(alpha: 0.38);
+  static final Color glassSheet = background.withValues(alpha: 0.92);
+  static final Color glassInputFill = white.withValues(alpha: 0.72);
+  static final Color glassNav = white.withValues(alpha: 0.85);
 
   // Glass gradients
   static final Gradient glassShimmer = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      white.withValues(alpha: 0.28),
-      white.withValues(alpha: 0.06),
-      background.withValues(alpha: 0.02),
+      white.withValues(alpha: 0.35),
+      white.withValues(alpha: 0.10),
+      background.withValues(alpha: 0.04),
     ],
   );
 
@@ -263,8 +263,8 @@ class AppColors {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [
-      highlight.withValues(alpha: 0.16),
-      highlight.withValues(alpha: 0.03),
+      highlight.withValues(alpha: 0.18),
+      highlight.withValues(alpha: 0.04),
     ],
   );
 }
