@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../data/security_repository.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_design.dart';
 import '../utils/app_snackbar.dart';
+import '../widget/glass_widgets.dart';
 
 class RecoveryQuestionsScreen extends StatefulWidget {
   const RecoveryQuestionsScreen({
@@ -86,117 +88,130 @@ class _RecoveryQuestionsScreenState extends State<RecoveryQuestionsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Recovery Questions')),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Icon(
-                      Icons.shield_outlined,
-                      size: 58,
-                      color: AppColors.highlight,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Choose answers you will remember',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'You will need both answers if you forget your PIN. Answers ignore capital letters and extra spaces.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.secondaryText),
-                    ),
-                    const SizedBox(height: 28),
-                    DropdownButtonFormField<String>(
-                      initialValue: _firstQuestion,
-                      decoration: const InputDecoration(
-                        labelText: 'First question',
-                      ),
-                      isExpanded: true,
-                      items: SecurityRepository.recoveryQuestionChoices
-                          .map(
-                            (question) => DropdownMenuItem(
-                              value: question,
-                              child: Text(
-                                question,
-                                overflow: TextOverflow.ellipsis,
+      body: AppBackground(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 520),
+                child: Form(
+                  key: _formKey,
+                  child: GlassCard(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                    radius: 18,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Icon(
+                          Icons.shield_outlined,
+                          size: 58,
+                          color: AppColors.highlight,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Choose answers you will remember',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'You will need both answers if you forget your PIN. Answers ignore capital letters and extra spaces.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: AppColors.secondaryText),
+                        ),
+                        const SizedBox(height: 28),
+                        DropdownButtonFormField<String>(
+                          initialValue: _firstQuestion,
+                          decoration: const InputDecoration(
+                            labelText: 'First question',
+                          ),
+                          isExpanded: true,
+                          items: SecurityRepository.recoveryQuestionChoices
+                              .map(
+                                (question) => DropdownMenuItem(
+                                  value: question,
+                                  child: Text(
+                                    question,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => _firstQuestion = value);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _firstAnswerController,
+                          textInputAction: TextInputAction.next,
+                          validator: _validateAnswer,
+                          decoration: const InputDecoration(
+                            labelText: 'First answer',
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        DropdownButtonFormField<String>(
+                          initialValue: _secondQuestion,
+                          decoration: const InputDecoration(
+                            labelText: 'Second question',
+                          ),
+                          isExpanded: true,
+                          items: SecurityRepository.recoveryQuestionChoices
+                              .map(
+                                (question) => DropdownMenuItem(
+                                  value: question,
+                                  child: Text(
+                                    question,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => _secondQuestion = value);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _secondAnswerController,
+                          textInputAction: TextInputAction.done,
+                          validator: _validateAnswer,
+                          onFieldSubmitted: (_) => _save(),
+                          decoration: const InputDecoration(
+                            labelText: 'Second answer',
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                        GlassButton(
+                          onPressed: _isSaving ? null : _save,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (_isSaving)
+                                const SizedBox.square(
+                                  dimension: 18,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
+                                )
+                              else
+                                const Icon(Icons.check_rounded, size: 20, color: AppColors.white),
+                              const SizedBox(width: 8),
+                              Text(
+                                widget.pinToSave == null
+                                    ? 'Save Recovery Questions'
+                                    : 'Save PIN and Recovery',
                               ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => _firstQuestion = value);
-                        }
-                      },
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _firstAnswerController,
-                      textInputAction: TextInputAction.next,
-                      validator: _validateAnswer,
-                      decoration: const InputDecoration(
-                        labelText: 'First answer',
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    DropdownButtonFormField<String>(
-                      initialValue: _secondQuestion,
-                      decoration: const InputDecoration(
-                        labelText: 'Second question',
-                      ),
-                      isExpanded: true,
-                      items: SecurityRepository.recoveryQuestionChoices
-                          .map(
-                            (question) => DropdownMenuItem(
-                              value: question,
-                              child: Text(
-                                question,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => _secondQuestion = value);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _secondAnswerController,
-                      textInputAction: TextInputAction.done,
-                      validator: _validateAnswer,
-                      onFieldSubmitted: (_) => _save(),
-                      decoration: const InputDecoration(
-                        labelText: 'Second answer',
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    FilledButton.icon(
-                      onPressed: _isSaving ? null : _save,
-                      icon: _isSaving
-                          ? const SizedBox.square(
-                              dimension: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.check_rounded),
-                      label: Text(
-                        widget.pinToSave == null
-                            ? 'Save Recovery Questions'
-                            : 'Save PIN and Recovery',
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

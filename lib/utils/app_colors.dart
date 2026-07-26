@@ -20,7 +20,6 @@ class AppColors {
 
   // Primary (Soft Lavender) - for secondary buttons, badges, charts
   static const Color primary = Color(0xFFCDB4FF);
-  static const Color primaryDark = Color(0xFFB8A0E6);
 
   // Accent (Baby Pink) - for soft accents, illustrations
   static const Color accent = Color(0xFFF8BBD0);
@@ -28,13 +27,11 @@ class AppColors {
   // Highlight / CTA (Powder Blue) - for primary buttons, active states
   static const Color highlight = Color(0xFF7EB6FF);
 
-  // Success - Soft Green (#A8E6CF) - for success messages, confirmations
+  // Success - Soft Green - for success messages, confirmations
   static const Color success = Color(0xFFA8E6CF);
-  static const Color successLight = Color(0xFFE8F8EF);
 
-  // Error - Soft Red (#FFB4B4) - for error messages, warnings
+  // Error - Soft Red - for error messages, warnings
   static const Color error = Color(0xFFFFB4B4);
-  static const Color errorLight = Color(0xFFFFEAEA);
 
   // Snackbar colors
   static const Color snackbarNeutral = Color(0xFF3600A3);
@@ -43,38 +40,25 @@ class AppColors {
 
   // Additional colors from palette
   static const Color softPeach = Color(0xFFFFE5B4);
-  static const Color softPeachLight = Color(0xFFFFE5B4);
   static const Color softLavender = Color(0xFFCDB4FF);
-  static const Color softGreen = Color(0xFFA8E6CF);
-  static const Color softRed = Color(0xFFFFB4B4);
-  static const Color softRedLight = Color(0xFFFFB4B4);
 
   // Standard
   static const Color white = Colors.white;
-  static const Color white70 = Color(0xFFB8B8B8);
   static const Color black = Colors.black;
   static const Color grey = Color(0xFF9CA3AF);
   static const Color lightGrey = Color(0xFFE5E7EB);
 
   // Income (Green) - color for income/earnings
-  static const Color lendColor = Color(0xFFA8E6CF); // soft green
+  static const Color lendColor = Color(0xFFA8E6CF);
   static const Color lendColorLight = Color(0xFFE8F8EF);
-  static const Color lendColorDark = Color(
-    0xFF2E7D32,
-  ); // dark green for Income text
+  static const Color lendColorDark = Color(0xFF2E7D32);
 
   // Expense (Red) - color for expenses/outflows
-  static const Color borrowColor = Color(0xFFFFB4B4); // soft red
+  static const Color borrowColor = Color(0xFFFFB4B4);
   static const Color borrowColorLight = Color(0xFFFFEAEA);
-  static const Color borrowColorDark = Color(
-    0xFFC62828,
-  ); // dark red for Expense text
-
-  // Lent (Blue) - color for lent money
-  // Uses highlight (0xFF7EB6FF)
+  static const Color borrowColorDark = Color(0xFFC62828);
 
   // Borrowed (Amber/Orange) - color for borrowed money
-  // Premium warm amber — high contrast, distinct from Income/Expense/Lent
   static const Color borrowedColor = Color(0xFFE67E22);
   static const Color borrowedColorLight = Color(0xFFFFF3E0);
   static const Color borrowedColorDark = Color(0xFFC05C0F);
@@ -284,7 +268,3 @@ class AppColors {
     ],
   );
 }
-
-// NOTE: keep UI color alpha derivations in a consistent way.
-// If withValues() is unused elsewhere, it is safe to remove; glass surfaces
-// currently use withOpacity()/withValues() in AppColors constants.

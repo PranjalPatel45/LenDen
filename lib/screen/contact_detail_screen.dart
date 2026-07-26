@@ -13,7 +13,7 @@ import '../utils/app_colors.dart';
 import '../utils/app_snackbar.dart';
 import '../utils/app_design.dart';
 import '../utils/app_motion.dart';
-import '../utils/snackbar_feedback.dart';
+import '../utils/delete_restore.dart';
 import '../widget/glass_widgets.dart';
 import 'edit_expense_screen.dart';
 
@@ -59,7 +59,7 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
         if (mounted) {
           AppSnackbar.showError(
             context: context,
-            message: 'Failed to save: $e',
+            message: 'Failed to save transaction.',
           );
         }
       }
@@ -170,46 +170,12 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                       background: const SizedBox.shrink(),
                       onDismissed: (direction) async {
                         if (direction == DismissDirection.endToStart) {
-                          late final int originalKey;
-                          try {
-                            originalKey = await widget.expenseRepository.delete(
-                              expense,
-                            );
-                          } catch (e) {
-                            if (context.mounted) {
-                              AppSnackbar.showError(
-                                context: context,
-                                message: 'Failed to delete: $e',
-                              );
-                            }
-                            return;
-                          }
-                          if (!mounted) return;
-                          showDeletionUndoSnackBar(
-                            this.context,
-                            message: 'Transaction deleted',
-                            restore: () async {
-                              if (mounted) {
-                                setState(
-                                  () => _restoredExpenseKeys.add(originalKey),
-                                );
-                              }
-                              try {
-                                await widget.expenseRepository.restore(
-                                  expense,
-                                  originalKey: originalKey,
-                                );
-                              } catch (_) {
-                                if (mounted) {
-                                  setState(
-                                    () => _restoredExpenseKeys.remove(
-                                      originalKey,
-                                    ),
-                                  );
-                                }
-                                rethrow;
-                              }
-                            },
+                          await deleteExpenseWithUndo(
+                            context: context,
+                            expense: expense,
+                            expenseRepository: widget.expenseRepository,
+                            restoredKeys: _restoredExpenseKeys,
+                            onStateChanged: () => setState(() {}),
                           );
                         }
                       },

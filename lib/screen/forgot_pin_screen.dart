@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 
 import '../data/security_repository.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_design.dart';
 import '../utils/app_snackbar.dart';
+import '../widget/glass_widgets.dart';
 
 class ForgotPinScreen extends StatefulWidget {
   const ForgotPinScreen({
@@ -185,13 +187,15 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Forgot PIN')),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: _buildContent(),
+      body: AppBackground(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 520),
+                child: _buildContent(),
+              ),
             ),
           ),
         ),
@@ -200,23 +204,29 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
   }
 
   Widget _buildContent() {
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_isLoading) return const GlassLoadingState();
     if (_setup == null) {
-      return const Column(
-        children: [
-          Icon(Icons.no_encryption_outlined, size: 56),
-          SizedBox(height: 16),
-          Text(
-            'Recovery questions were not set for this PIN.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Unlock using your PIN or biometrics, then add recovery questions from Settings.',
-            textAlign: TextAlign.center,
-          ),
-        ],
+      return GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+        radius: 18,
+        child: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.no_encryption_outlined, size: 56, color: AppColors.highlight),
+            SizedBox(height: 16),
+            Text(
+              'Recovery questions were not set for this PIN.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.primaryText),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Unlock using your PIN or biometrics, then add recovery questions from Settings.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.primaryText),
+            ),
+          ],
+        ),
       );
     }
     if (_answersVerified) return _buildNewPinForm();
@@ -225,91 +235,111 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
 
   Widget _buildAnswerForm() {
     final setup = _setup!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Icon(Icons.quiz_outlined, size: 56, color: AppColors.highlight),
-        const SizedBox(height: 16),
-        Text(
-          'Answer both recovery questions',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 24),
-        TextFormField(
-          controller: _firstAnswerController,
-          obscureText: _hideAnswers,
-          enabled: !_isLocked && !_isBusy,
-          textInputAction: TextInputAction.next,
-          decoration: InputDecoration(labelText: setup.questionOne),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _secondAnswerController,
-          obscureText: _hideAnswers,
-          enabled: !_isLocked && !_isBusy,
-          textInputAction: TextInputAction.done,
-          onFieldSubmitted: (_) => _verifyAnswers(),
-          decoration: InputDecoration(
-            labelText: setup.questionTwo,
-            suffixIcon: IconButton(
-              tooltip: _hideAnswers ? 'Show answers' : 'Hide answers',
-              onPressed: () => setState(() => _hideAnswers = !_hideAnswers),
-              icon: Icon(
-                _hideAnswers ? Icons.visibility_outlined : Icons.visibility_off,
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+      radius: 18,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Icon(Icons.quiz_outlined, size: 56, color: AppColors.highlight),
+          const SizedBox(height: 16),
+          Text(
+            'Answer both recovery questions',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 24),
+          TextFormField(
+            controller: _firstAnswerController,
+            obscureText: _hideAnswers,
+            enabled: !_isLocked && !_isBusy,
+            textInputAction: TextInputAction.next,
+            decoration: InputDecoration(labelText: setup.questionOne),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _secondAnswerController,
+            obscureText: _hideAnswers,
+            enabled: !_isLocked && !_isBusy,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => _verifyAnswers(),
+            decoration: InputDecoration(
+              labelText: setup.questionTwo,
+              suffixIcon: IconButton(
+                tooltip: _hideAnswers ? 'Show answers' : 'Hide answers',
+                onPressed: () => setState(() => _hideAnswers = !_hideAnswers),
+                icon: Icon(
+                  _hideAnswers ? Icons.visibility_outlined : Icons.visibility_off,
+                ),
               ),
             ),
           ),
-        ),
-        if (_attemptMessage.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Text(
-            _attemptMessage,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: _isLocked
-                  ? AppColors.snackbarError
-                  : AppColors.secondaryText,
-              fontWeight: _isLocked ? FontWeight.w600 : FontWeight.normal,
+          if (_attemptMessage.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              _attemptMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: _isLocked
+                    ? AppColors.snackbarError
+                    : AppColors.secondaryText,
+                fontWeight: _isLocked ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ],
+          const SizedBox(height: 24),
+          GlassButton(
+            onPressed: _isBusy || _isLocked ? null : _verifyAnswers,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.verified_user_outlined, size: 20, color: AppColors.white),
+                SizedBox(width: 8),
+                Text('Verify Answers'),
+              ],
             ),
           ),
         ],
-        const SizedBox(height: 24),
-        FilledButton.icon(
-          onPressed: _isBusy || _isLocked ? null : _verifyAnswers,
-          icon: const Icon(Icons.verified_user_outlined),
-          label: const Text('Verify Answers'),
-        ),
-      ],
+      ),
     );
   }
 
   Widget _buildNewPinForm() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Icon(
-          Icons.lock_reset_rounded,
-          size: 56,
-          color: AppColors.highlight,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Create a new PIN',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 24),
-        _pinField(_newPinController, 'New 4-digit PIN'),
-        const SizedBox(height: 16),
-        _pinField(_confirmPinController, 'Confirm new PIN'),
-        const SizedBox(height: 24),
-        FilledButton.icon(
-          onPressed: _isBusy ? null : _saveNewPin,
-          icon: const Icon(Icons.lock_open_rounded),
-          label: const Text('Reset PIN'),
-        ),
-      ],
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+      radius: 18,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Icon(
+            Icons.lock_reset_rounded,
+            size: 56,
+            color: AppColors.highlight,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Create a new PIN',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 24),
+          _pinField(_newPinController, 'New 4-digit PIN'),
+          const SizedBox(height: 16),
+          _pinField(_confirmPinController, 'Confirm new PIN'),
+          const SizedBox(height: 24),
+          GlassButton(
+            onPressed: _isBusy ? null : _saveNewPin,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.lock_open_rounded, size: 20, color: AppColors.white),
+                SizedBox(width: 8),
+                Text('Reset PIN'),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

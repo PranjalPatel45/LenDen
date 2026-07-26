@@ -27,7 +27,7 @@ void showDeletionUndoSnackBar(
         if (context.mounted) {
           AppSnackbar.showError(
             context: context,
-            message: 'Failed to restore: $error',
+            message: 'Failed to restore transaction.',
           );
         }
       }

@@ -14,7 +14,7 @@ import '../utils/app_snackbar.dart';
 import '../utils/app_design.dart';
 import '../utils/expense_period.dart';
 import '../utils/app_motion.dart';
-import '../utils/snackbar_feedback.dart';
+import '../utils/delete_restore.dart';
 import '../utils/transaction_type.dart';
 import '../utils/glass_toast.dart';
 import 'form_screen.dart';
@@ -113,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (mounted) {
           AppSnackbar.showError(
             context: context,
-            message: 'Failed to save: $e',
+            message: 'Failed to save transaction.',
           );
         }
       }
@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Text(
-                  'Error loading data: $e',
+                  'Unable to load your data. Please restart the app.',
                   style: const TextStyle(
                     color: AppColors.snackbarError,
                     fontSize: 16,
@@ -233,97 +233,60 @@ class _HomeScreenState extends State<HomeScreen> {
                   )
                 else
                   SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final expense = filteredExpenses[index];
-                        final dismissible = Dismissible(
-                          key: Key(expense.key.toString()),
-                          direction: DismissDirection.endToStart,
-                          background: const SizedBox.shrink(),
-                            onDismissed: (direction) async {
-                              if (direction == DismissDirection.endToStart) {
-                                late final int originalKey;
-                                try {
-                                  originalKey = await widget.expenseRepository
-                                      .delete(expense);
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    AppSnackbar.showError(
-                                      context: context,
-                                      message: 'Failed to delete: $e',
-                                    );
-                                  }
-                                  return;
-                                }
-                                if (!mounted) return;
-                                showDeletionUndoSnackBar(
-                                  this.context,
-                                  message: 'Transaction deleted',
-                                  restore: () async {
-                                    if (mounted) {
-                                      setState(
-                                        () =>
-                                            _restoredExpenseKeys.add(originalKey),
-                                      );
-                                    }
-                                    try {
-                                      await widget.expenseRepository.restore(
-                                        expense,
-                                        originalKey: originalKey,
-                                      );
-                                    } catch (_) {
-                                      if (mounted) {
-                                        setState(
-                                          () => _restoredExpenseKeys.remove(
-                                            originalKey,
-                                          ),
-                                        );
-                                      }
-                                      rethrow;
-                                    }
-                                  },
-                                );
-                              }
-                            },
-                          secondaryBackground: Container(
-                            margin: const EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 16,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: AppColors.borrowColor,
-                            ),
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: const Icon(
-                              Icons.delete_rounded,
-                              color: AppColors.white,
-                              size: 28,
-                            ),
-                          ),
-                          child: GestureDetector(
-                            onTap: () => _navigateToEditExpense(expense),
-                            child: ExpenseTile(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final expense = filteredExpenses[index];
+                      final dismissible = Dismissible(
+                        key: Key(expense.key.toString()),
+                        direction: DismissDirection.endToStart,
+                        background: const SizedBox.shrink(),
+                        onDismissed: (direction) async {
+                          if (direction == DismissDirection.endToStart) {
+                            await deleteExpenseWithUndo(
+                              context: context,
                               expense: expense,
-                              currencySymbol: currencySymbol,
-                            ),
+                              expenseRepository: widget.expenseRepository,
+                              restoredKeys: _restoredExpenseKeys,
+                              onStateChanged: () => setState(() {}),
+                            );
+                          }
+                        },
+                        secondaryBackground: Container(
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 16,
                           ),
-                        );
-                        if (_restoredExpenseKeys.contains(expense.key)) {
-                          return RestoreMotion(
-                            key: ValueKey('restored-expense-${expense.key}'),
-                            child: dismissible,
-                          );
-                        }
-                        return EntranceMotion(
-                          key: ValueKey('expense-${expense.key}'),
-                          order: index,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: AppColors.borrowColor,
+                          ),
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: const Icon(
+                            Icons.delete_rounded,
+                            color: AppColors.white,
+                            size: 28,
+                          ),
+                        ),
+                        child: GestureDetector(
+                          onTap: () => _navigateToEditExpense(expense),
+                          child: ExpenseTile(
+                            expense: expense,
+                            currencySymbol: currencySymbol,
+                          ),
+                        ),
+                      );
+                      if (_restoredExpenseKeys.contains(expense.key)) {
+                        return RestoreMotion(
+                          key: ValueKey('restored-expense-${expense.key}'),
                           child: dismissible,
                         );
-                      },
-                      childCount: filteredExpenses.length,
-                    ),
+                      }
+                      return EntranceMotion(
+                        key: ValueKey('expense-${expense.key}'),
+                        order: index,
+                        child: dismissible,
+                      );
+                    }, childCount: filteredExpenses.length),
                   ),
                 // Add bottom padding to account for FAB and bottom nav bar
                 SliverToBoxAdapter(

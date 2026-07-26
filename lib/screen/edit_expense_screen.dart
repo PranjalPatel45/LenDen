@@ -156,7 +156,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                 if (context.mounted) {
                   AppSnackbar.showError(
                     context: context,
-                    message: 'Failed to save: $e',
+                    message: 'Failed to save transaction.',
                   );
                 }
               } finally {
