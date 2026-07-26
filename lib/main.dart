@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:to_do/config/app_security_config.dart';
 import 'package:to_do/data/expense_repository.dart';
 import 'package:to_do/data/security_repository.dart';
 import 'package:to_do/data/settings_repository.dart';
 import 'package:to_do/screen/lock_screen.dart';
 import 'package:to_do/screen/splash_screen.dart';
 import 'package:to_do/utils/app_colors.dart';
+import 'package:to_do/utils/screen_security.dart';
 
 import 'model/expense_model.dart';
 
@@ -37,6 +39,9 @@ Future<void> _initializeApp() async {
     SettingsRepository.boxName,
     encryptionCipher: HiveAesCipher(encryptionKey),
   );
+
+  // Apply developer build screen security setting.
+  await ScreenSecurity.apply(AppSecurityConfig.allowScreenshots);
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
