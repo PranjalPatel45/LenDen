@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 
 import '../utils/app_colors.dart';
 import '../utils/app_design.dart';
+import '../data/security_repository.dart';
+import '../data/settings_repository.dart';
+import 'home_screen.dart';
 import 'lock_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -72,11 +75,20 @@ class _SplashScreenState extends State<SplashScreen>
     }
 
     if (!mounted) return;
+    const securityRepository = SecurityRepository();
+    const settingsRepository = SettingsRepository();
+    final hasCompletedOnboarding = settingsRepository.hasCompletedOnboarding;
+    final hasPin = await securityRepository.hasPin();
+
+    final Widget targetScreen = (hasCompletedOnboarding && !hasPin)
+        ? const HomeScreen()
+        : const LockScreen();
+
+    if (!mounted) return;
     await Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const LockScreen(),
+        pageBuilder: (context, animation, secondaryAnimation) => targetScreen,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
             opacity: animation,

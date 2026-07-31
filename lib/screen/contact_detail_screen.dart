@@ -6,6 +6,7 @@ import 'package:to_do/data/settings_repository.dart';
 import 'package:to_do/model/expense_model.dart';
 import 'package:to_do/screen/form_screen.dart';
 import 'package:to_do/utils/contact_identity.dart';
+import 'package:to_do/utils/currency_helper.dart';
 import 'package:to_do/utils/transaction_type.dart';
 
 import '../widget/expense_tile.dart';
@@ -38,6 +39,7 @@ class ContactDetailScreen extends StatefulWidget {
 
 class _ContactDetailScreenState extends State<ContactDetailScreen> {
   final Set<int> _restoredExpenseKeys = <int>{};
+
   void _navigateAndAddExpense() async {
     final newExpense = await Navigator.push<Expense>(
       context,
@@ -46,7 +48,7 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
           prefillContactName: widget.contactName,
           prefillPhoneNumber: widget.phoneNumber,
           allowedTypes: TransactionType.contactTypes,
-          title: 'Add Lent or Borrowed',
+          title: 'Lend or Borrow with ${widget.contactName}',
           settingsRepository: widget.settingsRepository,
         ),
       ),
@@ -102,14 +104,17 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
       floatingActionButton: PressScale(
         pressedScale: 0.94,
         hoverScale: 1.025,
-        child: FloatingActionButton(
+        child: FloatingActionButton.extended(
           onPressed: _navigateAndAddExpense,
           backgroundColor: AppColors.highlight,
           foregroundColor: AppColors.white,
           elevation: 3,
           highlightElevation: 1,
-          tooltip: 'Add transaction',
-          child: const Icon(Icons.add_rounded, size: 26),
+          icon: const Icon(Icons.add_rounded, size: 22),
+          label: const Text(
+            'Lend / Borrow',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
         ),
       ),
       body: AppBackground(
@@ -120,54 +125,176 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
             builder: (context, box, _) {
               final allExpenses = widget.expenseRepository.getAll();
               final contactExpenses = _getContactExpenses(allExpenses);
-
-              if (contactExpenses.isEmpty) {
-                return ResponsiveContent(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: GlassEmptyState(
-                        icon: Icons.receipt_long_outlined,
-                        title: 'Start a transaction',
-                        message:
-                            'Record what you lent or borrowed with ${widget.contactName}.',
-                        action: SizedBox(
-                          width: 160,
-                          child: GlassButton(
-                            onPressed: _navigateAndAddExpense,
-                            child: const Text('Add transaction'),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }
-
               final currencySymbol = widget.settingsRepository.currencySymbol;
+
+              double totalLent = 0;
+              double totalBorrowed = 0;
+              for (final e in contactExpenses) {
+                if (e.type == TransactionType.lent) {
+                  totalLent += e.amount;
+                } else if (e.type == TransactionType.borrowed) {
+                  totalBorrowed += e.amount;
+                }
+              }
+              final netBalance = totalLent - totalBorrowed;
+
+              String dynamicStatus;
+              Color statusColor;
+              if (netBalance > 0) {
+                dynamicStatus = '${widget.contactName} owes you ${formatCurrency(netBalance, currencySymbol)}';
+                statusColor = AppColors.lendColorDark;
+              } else if (netBalance < 0) {
+                dynamicStatus = 'You owe ${widget.contactName} ${formatCurrency(netBalance.abs(), currencySymbol)}';
+                statusColor = AppColors.borrowedColorDark;
+              } else {
+                dynamicStatus = 'All settled up with ${widget.contactName}';
+                statusColor = AppColors.grey;
+              }
 
               return ResponsiveContent(
                 maxWidth: 760,
                 child: ListView.builder(
-                  padding: const EdgeInsets.only(top: 8, bottom: 88),
-                  itemCount: contactExpenses.length + 1,
+                  padding: const EdgeInsets.only(top: 12, bottom: 88),
+                  itemCount: contactExpenses.isEmpty ? 1 : contactExpenses.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
                       return Padding(
-                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 5),
-                        child: SectionLabel(
-                          label:
-                              '${contactExpenses.length} ${contactExpenses.length == 1 ? 'transaction' : 'transactions'}',
-                          icon: Icons.history_rounded,
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                        child: GlassCard(
+                          radius: 20,
+                          padding: const EdgeInsets.all(18),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor: AppColors.highlight.withValues(alpha: 0.12),
+                                    child: Text(
+                                      widget.contactName.isNotEmpty
+                                          ? widget.contactName[0].toUpperCase()
+                                          : '?',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.highlight,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          widget.contactName,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                        if (widget.phoneNumber != null && widget.phoneNumber!.isNotEmpty)
+                                          Text(
+                                            widget.phoneNumber!,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: AppColors.primaryText.withValues(alpha: 0.6),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: statusColor.withValues(alpha: 0.2)),
+                                ),
+                                child: Text(
+                                  dynamicStatus,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: statusColor,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'Lent',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.primaryText.withValues(alpha: 0.6),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          formatCurrency(totalLent, currencySymbol),
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.lendColorDark,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(height: 30, width: 1, color: AppColors.primaryText.withValues(alpha: 0.1)),
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'Borrowed',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.primaryText.withValues(alpha: 0.6),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          formatCurrency(totalBorrowed, currencySymbol),
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.borrowedColorDark,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }
-                    final expense = contactExpenses[index - 1];
 
+                    if (contactExpenses.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: GlassEmptyState(
+                          icon: Icons.receipt_long_outlined,
+                          title: 'No transactions',
+                          message: 'Tap "Lend / Borrow" below to add a transaction with ${widget.contactName}.',
+                        ),
+                      );
+                    }
+
+                    final expense = contactExpenses[index - 1];
                     final dismissible = Dismissible(
                       key: Key(expense.key.toString()),
                       direction: DismissDirection.endToStart,
-                      background: const SizedBox.shrink(),
                       onDismissed: (direction) async {
                         if (direction == DismissDirection.endToStart) {
                           await deleteExpenseWithUndo(
@@ -180,11 +307,16 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                         }
                       },
                       secondaryBackground: Container(
-                        color: AppColors.borrowColor,
+                        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: AppColors.borrowColor,
+                        ),
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         alignment: Alignment.centerRight,
                         child: const Icon(Icons.delete, color: Colors.white),
                       ),
+                      background: const SizedBox.shrink(),
                       child: GestureDetector(
                         onTap: () => _navigateToEditExpense(expense),
                         child: ExpenseTile(
@@ -193,14 +325,14 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                         ),
                       ),
                     );
+
                     if (_restoredExpenseKeys.contains(expense.key)) {
                       return RestoreMotion(
-                        key: ValueKey(
-                          'restored-contact-expense-${expense.key}',
-                        ),
+                        key: ValueKey('restored-contact-expense-${expense.key}'),
                         child: dismissible,
                       );
                     }
+
                     return EntranceMotion(
                       key: ValueKey('contact-expense-${expense.key}'),
                       order: index - 1,

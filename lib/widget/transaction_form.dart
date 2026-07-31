@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 
 import '../utils/app_colors.dart';
 import '../utils/app_motion.dart';
+import '../utils/transaction_type.dart';
+import 'category_field.dart';
 import 'expense_type_field.dart';
 import 'glass_widgets.dart';
 
@@ -26,6 +28,10 @@ class TransactionForm extends StatelessWidget {
     required this.submitLabel,
     this.titleFieldLabel = 'Title',
     this.titleFieldPrefixIcon,
+    this.isTitleReadOnly = false,
+    this.selectedCategory,
+    this.categories = const [],
+    this.onCategoryChanged,
     this.typeItemTextColor = AppColors.primaryText,
     this.submitColor = AppColors.highlight,
     this.submitForegroundColor = AppColors.white,
@@ -47,6 +53,10 @@ class TransactionForm extends StatelessWidget {
   final String submitLabel;
   final String titleFieldLabel;
   final Widget? titleFieldPrefixIcon;
+  final bool isTitleReadOnly;
+  final String? selectedCategory;
+  final List<String> categories;
+  final ValueChanged<String>? onCategoryChanged;
   final Color typeItemTextColor;
   final Color submitColor;
   final Color submitForegroundColor;
@@ -104,7 +114,10 @@ class TransactionForm extends StatelessWidget {
               GlassInput(
                 controller: titleController,
                 labelText: titleFieldLabel,
-                prefixIcon: titleFieldPrefixIcon,
+                readOnly: isTitleReadOnly,
+                prefixIcon: isTitleReadOnly
+                    ? const Icon(Icons.lock_outline_rounded, color: AppColors.grey)
+                    : titleFieldPrefixIcon,
               ),
               const SizedBox(height: 16),
               ExpenseTypeField(
@@ -113,6 +126,15 @@ class TransactionForm extends StatelessWidget {
                 itemTextColor: typeItemTextColor,
                 onChanged: onTypeChanged,
               ),
+              if (onCategoryChanged != null &&
+                  !TransactionType.isContactType(selectedType ?? '')) ...[
+                const SizedBox(height: 16),
+                CategoryField(
+                  selectedCategory: selectedCategory,
+                  categories: categories,
+                  onCategorySelected: onCategoryChanged!,
+                ),
+              ],
               const SizedBox(height: 16),
               GlassInput(
                 controller: reasonController,

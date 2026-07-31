@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 
 import '../data/security_repository.dart';
+import '../data/settings_repository.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_snackbar.dart';
 import '../utils/app_motion.dart';
@@ -338,18 +339,22 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
       return;
     }
     if (!mounted) return;
+    await const SettingsRepository().setHasCompletedOnboarding(true);
     _newPinController.clear();
     _confirmPinController.clear();
     setState(() {
       _isSetupMode = false;
     });
     unawaited(HapticFeedback.mediumImpact());
+    if (!mounted) return;
     AppSnackbar.showSuccess(
       context: context,
       message: 'PIN set successfully!',
     );
     if (widget.isChangePin && mounted) {
       unawaited(Navigator.maybePop(context, true));
+    } else if (mounted) {
+      _navigateToHome();
     }
   }
 

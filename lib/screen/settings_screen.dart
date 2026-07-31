@@ -99,8 +99,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove PIN'),
-        content: const Text('Are you sure you want to remove the app lock?'),
+        title: const Text('Disable App Lock?'),
+        content: const Text(
+          'Your financial data will no longer be protected by a PIN or biometric authentication.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -109,7 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: const Text(
-              'Remove',
+              'Disable',
               style: TextStyle(color: AppColors.snackbarError),
             ),
           ),
@@ -138,7 +140,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) {
         AppSnackbar.showSuccess(
           context: context,
-          message: 'PIN removed',
+          message: 'App Lock disabled',
         );
       }
     }

@@ -35,6 +35,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
   final dateController = TextEditingController();
   final reasonController = TextEditingController();
   String? _selectedType;
+  String? _selectedCategory;
   String _currencySymbol = '\$';
 
   @override
@@ -87,11 +88,15 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
             allowedTypes: widget.allowedTypes,
             currencySymbol: _currencySymbol,
             titleFieldLabel: widget.prefillContactName != null
-                ? 'Contact Name'
+                ? 'Contact Name (Locked)'
                 : 'Title',
             titleFieldPrefixIcon: widget.prefillContactName != null
-                ? const Icon(Icons.person)
+                ? const Icon(Icons.lock_outline_rounded)
                 : null,
+            isTitleReadOnly: widget.prefillContactName != null,
+            selectedCategory: _selectedCategory,
+            categories: widget.settingsRepository.categories,
+            onCategoryChanged: (cat) => setState(() => _selectedCategory = cat),
             onTypeChanged: (value) => setState(() => _selectedType = value),
             onDateTap: () async {
               final pickedDate = await showDatePicker(
@@ -107,7 +112,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
               }
             },
             onCancel: () => Navigator.pop(context),
-            onSubmit: () {
+            onSubmit: () async {
               final validation = validateExpenseInput(
                 title: titleController.text,
                 amountText: amountController.text,
@@ -124,6 +129,16 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
               }
               final amount = validation.amount!;
 
+              if (_selectedCategory != null && _selectedCategory!.trim().isNotEmpty) {
+                await widget.settingsRepository.saveCategory(_selectedCategory!);
+              }
+
+              final reasonText = [
+                if (_selectedCategory != null && _selectedCategory!.trim().isNotEmpty)
+                  'Category: ${_selectedCategory!.trim()}',
+                if (reasonController.text.isNotEmpty) reasonController.text,
+              ].join(' | ');
+
               final newExpense = Expense(
                 title: titleController.text,
                 amount: amount,
@@ -131,12 +146,12 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                 type: _selectedType!,
                 contactName: widget.prefillContactName,
                 phoneNumber: widget.prefillPhoneNumber,
-                reason: reasonController.text.isNotEmpty
-                    ? reasonController.text
-                    : null,
+                reason: reasonText.isNotEmpty ? reasonText : null,
               );
 
-              Navigator.pop(context, newExpense);
+              if (context.mounted) {
+                Navigator.pop(context, newExpense);
+              }
             },
             submitLabel: 'Submit',
           ),

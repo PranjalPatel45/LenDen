@@ -20,6 +20,7 @@ import '../utils/glass_toast.dart';
 import 'form_screen.dart';
 import 'edit_expense_screen.dart';
 import 'connect_screen.dart';
+import 'contact_detail_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -237,8 +238,32 @@ class _HomeScreenState extends State<HomeScreen> {
                       final expense = filteredExpenses[index];
                       final dismissible = Dismissible(
                         key: Key(expense.key.toString()),
-                        direction: DismissDirection.endToStart,
-                        background: const SizedBox.shrink(),
+                        direction: DismissDirection.horizontal,
+                        confirmDismiss: (direction) async {
+                          if (direction == DismissDirection.startToEnd) {
+                            if (expense.contactName != null &&
+                                expense.contactName!.isNotEmpty) {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ContactDetailScreen(
+                                    contactName: expense.contactName!,
+                                    phoneNumber: expense.phoneNumber,
+                                    expenseRepository: widget.expenseRepository,
+                                    settingsRepository: widget.settingsRepository,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              AppSnackbar.show(
+                                context: context,
+                                message: 'No contact associated with this transaction',
+                              );
+                            }
+                            return false;
+                          }
+                          return true;
+                        },
                         onDismissed: (direction) async {
                           if (direction == DismissDirection.endToStart) {
                             await deleteExpenseWithUndo(
@@ -250,6 +275,35 @@ class _HomeScreenState extends State<HomeScreen> {
                             );
                           }
                         },
+                        background: Container(
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: AppColors.highlight,
+                          ),
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.person_rounded,
+                                color: AppColors.white,
+                                size: 24,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'Contact',
+                                style: TextStyle(
+                                  color: AppColors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         secondaryBackground: Container(
                           margin: const EdgeInsets.symmetric(
                             vertical: 8,

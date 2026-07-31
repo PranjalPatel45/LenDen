@@ -28,8 +28,56 @@ class SettingsRepository {
   String get userName =>
       _box.get(_userNameKey, defaultValue: 'Friend') as String;
 
+  static const String _manualContactsKey = 'manual_contacts';
+  static const String _categoriesKey = 'categories';
+
+  static const List<String> defaultCategories = [
+    'Food',
+    'Shopping',
+    'Transport',
+    'Bills',
+    'Entertainment',
+    'Health',
+    'Salary',
+    'Investment',
+    'Other',
+  ];
+
   bool get hasCompletedOnboarding =>
       _box.get(_hasCompletedOnboardingKey, defaultValue: false) as bool;
+
+  List<Map<String, String>> get manualContacts {
+    final raw = _box.get(_manualContactsKey, defaultValue: <dynamic>[]) as List;
+    return raw.map((item) => Map<String, String>.from(item as Map)).toList();
+  }
+
+  Future<void> addManualContact(String name, String? phone) async {
+    final current = manualContacts;
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) return;
+    if (!current.any((c) => (c['name'] ?? '').toLowerCase() == trimmedName.toLowerCase())) {
+      current.add({'name': trimmedName, 'phone': phone?.trim() ?? ''});
+      await _box.put(_manualContactsKey, current);
+    }
+  }
+
+  List<String> get categories {
+    final raw = _box.get(_categoriesKey) as List?;
+    if (raw == null || raw.isEmpty) {
+      return List<String>.from(defaultCategories);
+    }
+    return raw.map((e) => e.toString()).toList();
+  }
+
+  Future<void> saveCategory(String categoryName) async {
+    final trimmed = categoryName.trim();
+    if (trimmed.isEmpty) return;
+    final current = categories;
+    if (!current.any((c) => c.toLowerCase() == trimmed.toLowerCase())) {
+      current.add(trimmed);
+      await _box.put(_categoriesKey, current);
+    }
+  }
 
   Future<void> setCurrency(String symbol, String code) async {
     await _box.putAll({_currencySymbolKey: symbol, _currencyCodeKey: code});
