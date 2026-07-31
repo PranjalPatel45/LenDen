@@ -6,6 +6,7 @@ import '../data/settings_repository.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_design.dart';
 import '../utils/app_motion.dart';
+import '../utils/app_transitions.dart';
 import '../widget/glass_widgets.dart';
 import 'lock_screen.dart';
 
@@ -32,19 +33,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _OnboardingItem(
       icon: Icons.account_balance_wallet_rounded,
       title: 'Personal Money',
-      subtitle: 'Effortlessly track your Income and Expenses in one place with zero clutter.',
+      subtitle:
+          'Effortlessly track your Income and Expenses in one place with zero clutter.',
       accentColor: AppColors.lendColorDark,
     ),
     _OnboardingItem(
       icon: Icons.people_alt_rounded,
       title: 'Money Between People',
-      subtitle: 'Manage Lent and Borrow amounts directly linked with your contacts.',
+      subtitle:
+          'Manage Lent and Borrow amounts directly linked with your contacts.',
       accentColor: AppColors.borrowColorDark,
     ),
     _OnboardingItem(
       icon: Icons.shield_rounded,
       title: '100% Offline & Private',
-      subtitle: 'Your financial data stays on your device, encrypted with AES-256 security.',
+      subtitle:
+          'Your financial data stays on your device, encrypted with AES-256 security.',
       accentColor: AppColors.highlight,
     ),
   ];
@@ -65,63 +69,77 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _promptUserName() {
     unawaited(
       showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.cardSurface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.highlight.withValues(alpha: 0.15),
-              ),
-              child: const Icon(Icons.person_rounded, color: AppColors.highlight, size: 20),
-            ),
-            const SizedBox(width: 10),
-            const Text('Welcome to LenDen!'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'What should we call you?',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.secondaryText,
-              ),
-            ),
-            const SizedBox(height: 14),
-            GlassInput(
-              controller: _nameController,
-              labelText: 'Your First Name',
-              prefixIcon: const Icon(Icons.badge_rounded),
-            ),
-          ],
-        ),
-        actions: [
-          GlassButton(
-            onPressed: () {
-              final name = _nameController.text.trim();
-              unawaited(widget.settingsRepository.setUserName(name.isNotEmpty ? name : 'Friend'));
-              Navigator.pop(context);
-              _finishOnboardingAndGoToPin();
-            },
-            color: AppColors.highlight,
-            child: const Text(
-              'Continue',
-              style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.white),
-            ),
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          backgroundColor: AppColors.cardSurface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
           ),
-        ],
+          title: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.highlight.withValues(alpha: 0.15),
+                ),
+                child: const Icon(
+                  Icons.person_rounded,
+                  color: AppColors.highlight,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Text('Welcome to LenDen!'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'What should we call you?',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.secondaryText,
+                ),
+              ),
+              const SizedBox(height: 14),
+              GlassInput(
+                controller: _nameController,
+                labelText: 'Your First Name',
+                prefixIcon: const Icon(Icons.badge_rounded),
+              ),
+            ],
+          ),
+          actions: [
+            GlassButton(
+              onPressed: () {
+                final name = _nameController.text.trim();
+                unawaited(
+                  widget.settingsRepository.setUserName(
+                    name.isNotEmpty ? name : 'Friend',
+                  ),
+                );
+                Navigator.pop(context);
+                _finishOnboardingAndGoToPin();
+              },
+              color: AppColors.highlight,
+              child: const Text(
+                'Continue',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),);
+    );
   }
 
   void _finishOnboardingAndGoToPin() async {
@@ -130,10 +148,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     await Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => LockScreen(
-          securityRepository: widget.securityRepository,
-        ),
+      AppTransitions.fadeThrough<void>(
+        page: LockScreen(securityRepository: widget.securityRepository),
       ),
     );
   }
@@ -154,7 +170,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               // Top Bar / Skip
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -176,7 +195,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         const SizedBox(width: 10),
                         Text(
                           'LenDen',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.5,
                               ),
@@ -202,7 +222,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
-                  onPageChanged: (index) => setState(() => _currentPage = index),
+                  onPageChanged: (index) =>
+                      setState(() => _currentPage = index),
                   itemCount: _items.length,
                   itemBuilder: (context, index) {
                     final item = _items[index];
@@ -220,12 +241,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 shape: BoxShape.circle,
                                 color: item.accentColor.withValues(alpha: 0.12),
                                 border: Border.all(
-                                  color: item.accentColor.withValues(alpha: 0.3),
+                                  color: item.accentColor.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   width: 2,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: item.accentColor.withValues(alpha: 0.15),
+                                    color: item.accentColor.withValues(
+                                      alpha: 0.15,
+                                    ),
                                     blurRadius: 24,
                                     offset: const Offset(0, 8),
                                   ),
@@ -245,7 +270,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             child: Text(
                               item.title,
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.primaryText,
                                   ),
@@ -258,7 +284,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             child: Text(
                               item.subtitle,
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              style: Theme.of(context).textTheme.bodyLarge
+                                  ?.copyWith(
                                     color: AppColors.secondaryText,
                                     height: 1.4,
                                   ),
@@ -290,7 +317,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             borderRadius: BorderRadius.circular(4),
                             color: isSelected
                                 ? AppColors.highlight
-                                : AppColors.secondaryText.withValues(alpha: 0.3),
+                                : AppColors.secondaryText.withValues(
+                                    alpha: 0.3,
+                                  ),
                           ),
                         );
                       }),

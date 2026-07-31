@@ -68,28 +68,12 @@ class _HomeScreenState extends State<HomeScreen> {
     unawaited(
       Navigator.push(
         context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              EditExpenseScreen(
-                expense: expense,
-                expenseRepository: widget.expenseRepository,
-                settingsRepository: widget.settingsRepository,
-              ),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.9, end: 1.0).animate(
-                  CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  ),
-                ),
-                child: child,
-              ),
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 300),
+        MaterialPageRoute(
+          builder: (context) => EditExpenseScreen(
+            expense: expense,
+            expenseRepository: widget.expenseRepository,
+            settingsRepository: widget.settingsRepository,
+          ),
         ),
       ),
     );
@@ -250,14 +234,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                     contactName: expense.contactName!,
                                     phoneNumber: expense.phoneNumber,
                                     expenseRepository: widget.expenseRepository,
-                                    settingsRepository: widget.settingsRepository,
+                                    settingsRepository:
+                                        widget.settingsRepository,
                                   ),
                                 ),
                               );
                             } else {
                               AppSnackbar.show(
                                 context: context,
-                                message: 'No contact associated with this transaction',
+                                message:
+                                    'No contact associated with this transaction',
                               );
                             }
                             return false;

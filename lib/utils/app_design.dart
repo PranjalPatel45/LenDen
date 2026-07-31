@@ -26,6 +26,14 @@ abstract final class AppSize {
 abstract final class AppMotion {
   static const Duration quick = Duration(milliseconds: 160);
   static const Duration standard = Duration(milliseconds: 280);
+
+  /// Full-screen route transitions. Kept short so navigation never feels
+  /// blocked, especially on low-end devices.
+  static const Duration route = Duration(milliseconds: 260);
+
+  /// Easing shared by full-screen route transitions. Ease-out starts fast so
+  /// the new screen appears responsive and finishes gently without overshoot.
+  static const Curve routeCurve = Curves.easeOutCubic;
 }
 
 /// Lightweight branded background. It uses layered palette tints without a

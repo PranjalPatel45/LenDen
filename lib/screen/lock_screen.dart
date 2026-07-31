@@ -8,6 +8,7 @@ import 'package:local_auth/local_auth.dart';
 import '../data/security_repository.dart';
 import '../data/settings_repository.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_transitions.dart';
 import '../utils/app_snackbar.dart';
 import '../utils/app_motion.dart';
 import '../widget/glass_widgets.dart';
@@ -176,16 +177,14 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
           _ =>
             'Biometric authentication could not be completed. Use your app PIN.',
         };
-        AppSnackbar.showError(
-          context: context,
-          message: message,
-        );
+        AppSnackbar.showError(context: context, message: message);
       }
     } catch (_) {
       if (mounted) {
         AppSnackbar.showError(
           context: context,
-          message: 'Biometric authentication could not be completed. Use your app PIN.',
+          message:
+              'Biometric authentication could not be completed. Use your app PIN.',
         );
       }
     }
@@ -244,10 +243,7 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
           : attemptState.isLockedAt(DateTime.now())
           ? 'Too many wrong attempts. Wait 30 seconds.'
           : 'Wrong PIN. ${attemptState.attemptsRemainingToday} attempts remaining today.';
-      AppSnackbar.showError(
-        context: context,
-        message: message,
-      );
+      AppSnackbar.showError(context: context, message: message);
     }
   }
 
@@ -301,17 +297,11 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
     final pin = _newPinController.text;
     final confirm = _confirmPinController.text;
     if (pin.length != 4 || confirm.length != 4) {
-      AppSnackbar.showError(
-        context: context,
-        message: 'PIN must be 4 digits.',
-      );
+      AppSnackbar.showError(context: context, message: 'PIN must be 4 digits.');
       return;
     }
     if (pin != confirm) {
-      AppSnackbar.showError(
-        context: context,
-        message: 'PINs do not match.',
-      );
+      AppSnackbar.showError(context: context, message: 'PINs do not match.');
       return;
     }
     try {
@@ -347,10 +337,7 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
     });
     unawaited(HapticFeedback.mediumImpact());
     if (!mounted) return;
-    AppSnackbar.showSuccess(
-      context: context,
-      message: 'PIN set successfully!',
-    );
+    AppSnackbar.showSuccess(context: context, message: 'PIN set successfully!');
     if (widget.isChangePin && mounted) {
       unawaited(Navigator.maybePop(context, true));
     } else if (mounted) {
@@ -381,25 +368,7 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
     unawaited(
       Navigator.pushReplacement(
         context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              const HomeScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 1.1, end: 1.0).animate(
-                  CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  ),
-                ),
-                child: child,
-              ),
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 500),
-        ),
+        AppTransitions.fadeThrough<void>(page: const HomeScreen()),
       ),
     );
   }
@@ -654,9 +623,13 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
                                     children: List.generate(4, (index) {
                                       final isFilled = index < pin.length;
                                       return AnimatedContainer(
-                                        duration: const Duration(milliseconds: 160),
+                                        duration: const Duration(
+                                          milliseconds: 160,
+                                        ),
                                         curve: Curves.easeOutCubic,
-                                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                        ),
                                         width: 16,
                                         height: 16,
                                         decoration: BoxDecoration(
@@ -667,13 +640,15 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
                                           border: Border.all(
                                             color: isFilled
                                                 ? AppColors.highlight
-                                                : AppColors.primaryText.withValues(alpha: 0.4),
+                                                : AppColors.primaryText
+                                                      .withValues(alpha: 0.4),
                                             width: 2,
                                           ),
                                           boxShadow: isFilled
                                               ? [
                                                   BoxShadow(
-                                                    color: AppColors.highlight.withValues(alpha: 0.4),
+                                                    color: AppColors.highlight
+                                                        .withValues(alpha: 0.4),
                                                     blurRadius: 10,
                                                     spreadRadius: 1,
                                                   ),
@@ -778,29 +753,47 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
                                     ),
                                   );
                                 },
-                                    child: IgnorePointer(
+                                child: IgnorePointer(
                                   ignoring: _isPinLocked || _isVerifyingPin,
                                   child: AnimatedOpacity(
                                     opacity: _isPinLocked ? 0.38 : 1,
                                     duration: const Duration(milliseconds: 200),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                      ),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          _buildNumberRow(['1', '2', '3'], keySize),
+                                          _buildNumberRow([
+                                            '1',
+                                            '2',
+                                            '3',
+                                          ], keySize),
                                           const SizedBox(height: 6),
-                                          _buildNumberRow(['4', '5', '6'], keySize),
+                                          _buildNumberRow([
+                                            '4',
+                                            '5',
+                                            '6',
+                                          ], keySize),
                                           const SizedBox(height: 6),
-                                          _buildNumberRow(['7', '8', '9'], keySize),
+                                          _buildNumberRow([
+                                            '7',
+                                            '8',
+                                            '9',
+                                          ], keySize),
                                           const SizedBox(height: 6),
-                                          _buildNumberRow(['', '0', 'delete'], keySize),
+                                          _buildNumberRow([
+                                            '',
+                                            '0',
+                                            'delete',
+                                          ], keySize),
                                         ],
                                       ),
                                     ),
                                   ),
-                                    ),
-                                  ),
+                                ),
+                              ),
 
                               TextButton(
                                 onPressed: _isVerifyingPin ? null : _forgotPin,

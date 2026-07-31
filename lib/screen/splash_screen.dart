@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../utils/app_colors.dart';
 import '../utils/app_design.dart';
+import '../utils/app_transitions.dart';
 import '../data/security_repository.dart';
 import '../data/settings_repository.dart';
 import 'home_screen.dart';
@@ -45,15 +46,13 @@ class _SplashScreenState extends State<SplashScreen>
       parent: _controller,
       curve: const Interval(0.2, 0.7, curve: Curves.easeOut),
     );
-    _contentSlide = Tween<Offset>(
-      begin: const Offset(0, 0.16),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.2, 0.75, curve: Curves.easeOutCubic),
-      ),
-    );
+    _contentSlide =
+        Tween<Offset>(begin: const Offset(0, 0.16), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.2, 0.75, curve: Curves.easeOutCubic),
+          ),
+        );
     _progress = CurvedAnimation(
       parent: _controller,
       curve: const Interval(0.6, 1, curve: Curves.easeInOutCubic),
@@ -87,24 +86,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
     await Navigator.pushReplacement(
       context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => targetScreen,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: ScaleTransition(
-              scale: Tween<double>(begin: 1.04, end: 1).animate(
-                CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOutCubic,
-                ),
-              ),
-              child: child,
-            ),
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 400),
-      ),
+      AppTransitions.fadeThrough<Widget>(page: targetScreen),
     );
   }
 
@@ -162,7 +144,9 @@ class _SplashScreenState extends State<SplashScreen>
                                     borderRadius: BorderRadius.circular(10),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppColors.highlight.withValues(alpha: 0.3),
+                                        color: AppColors.highlight.withValues(
+                                          alpha: 0.3,
+                                        ),
                                         blurRadius: 12,
                                         offset: const Offset(0, 4),
                                       ),
@@ -172,9 +156,8 @@ class _SplashScreenState extends State<SplashScreen>
                                     value: _progress.value,
                                     minHeight: 6,
                                     borderRadius: BorderRadius.circular(10),
-                                    backgroundColor: AppColors.primary.withValues(
-                                      alpha: 0.16,
-                                    ),
+                                    backgroundColor: AppColors.primary
+                                        .withValues(alpha: 0.16),
                                     color: AppColors.highlight,
                                   ),
                                 ),
@@ -220,10 +203,7 @@ class _LenDenMark extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppColors.cardSurface,
-            AppColors.white,
-          ],
+          colors: [AppColors.cardSurface, AppColors.white],
         ),
         borderRadius: BorderRadius.circular(30),
         border: Border.all(color: AppColors.white, width: 2.5),
@@ -280,10 +260,7 @@ class _LenDenMark extends StatelessWidget {
 }
 
 class _DirectionBadge extends StatelessWidget {
-  const _DirectionBadge({
-    required this.color,
-    required this.icon,
-  });
+  const _DirectionBadge({required this.color, required this.icon});
 
   final Color color;
   final IconData icon;
@@ -293,10 +270,7 @@ class _DirectionBadge extends StatelessWidget {
     return Container(
       width: 39,
       height: 39,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       child: Icon(icon, size: 21, color: AppColors.primaryText),
     );
   }
@@ -315,10 +289,7 @@ class _BrandContent extends StatelessWidget {
             return LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                AppColors.primaryText,
-                AppColors.highlight,
-              ],
+              colors: [AppColors.primaryText, AppColors.highlight],
             ).createShader(bounds);
           },
           child: const Text(
