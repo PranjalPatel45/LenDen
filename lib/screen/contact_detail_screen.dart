@@ -14,6 +14,7 @@ import '../utils/app_colors.dart';
 import '../utils/app_snackbar.dart';
 import '../utils/app_design.dart';
 import '../utils/app_motion.dart';
+import '../utils/app_transitions.dart';
 import '../utils/delete_restore.dart';
 import '../widget/glass_widgets.dart';
 import 'edit_expense_screen.dart';
@@ -38,13 +39,13 @@ class ContactDetailScreen extends StatefulWidget {
 }
 
 class _ContactDetailScreenState extends State<ContactDetailScreen> {
-  final Set<int> _restoredExpenseKeys = <int>{};
+  final Set<dynamic> _restoredExpenseKeys = <dynamic>{};
 
   void _navigateAndAddExpense() async {
     final newExpense = await Navigator.push<Expense>(
       context,
-      MaterialPageRoute(
-        builder: (context) => AddTodoScreen(
+      AppTransitions.slideUp<Expense>(
+        page: AddTodoScreen(
           prefillContactName: widget.contactName,
           prefillPhoneNumber: widget.phoneNumber,
           allowedTypes: TransactionType.contactTypes,
@@ -72,8 +73,8 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
     unawaited(
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => EditExpenseScreen(
+        AppTransitions.slideUp(
+          page: EditExpenseScreen(
             expense: expense,
             expenseRepository: widget.expenseRepository,
             settingsRepository: widget.settingsRepository,

@@ -13,10 +13,10 @@ Future<void> deleteExpenseWithUndo({
   required BuildContext context,
   required Expense expense,
   required ExpenseRepository expenseRepository,
-  required Set<int> restoredKeys,
+  required Set<dynamic> restoredKeys,
   required VoidCallback onStateChanged,
 }) async {
-  late final int originalKey;
+  late final dynamic originalKey;
   try {
     originalKey = await expenseRepository.delete(expense);
   } catch (e) {

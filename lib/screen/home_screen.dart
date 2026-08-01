@@ -17,6 +17,7 @@ import '../utils/app_motion.dart';
 import '../utils/delete_restore.dart';
 import '../utils/transaction_type.dart';
 import '../utils/glass_toast.dart';
+import '../utils/app_transitions.dart';
 import 'form_screen.dart';
 import 'edit_expense_screen.dart';
 import 'connect_screen.dart';
@@ -40,7 +41,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _contactSearchController =
       TextEditingController();
-  final Set<int> _restoredExpenseKeys = <int>{};
+  final Set<dynamic> _restoredExpenseKeys = <dynamic>{};
   int _selectedIndex = 0;
   String _selectedPeriod = allExpensePeriods;
   DateTime? _lastBackPressTime;
@@ -68,8 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
     unawaited(
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => EditExpenseScreen(
+        AppTransitions.slideUp(
+          page: EditExpenseScreen(
             expense: expense,
             expenseRepository: widget.expenseRepository,
             settingsRepository: widget.settingsRepository,
@@ -79,11 +80,39 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _onExpenseTileTap(Expense expense) {
+    if (TransactionType.isContactType(expense.type)) {
+      final contactName = expense.contactName?.trim();
+      if (contactName != null && contactName.isNotEmpty) {
+        unawaited(
+          Navigator.push(
+            context,
+            AppTransitions.slideRight(
+              page: ContactDetailScreen(
+                contactName: contactName,
+                phoneNumber: expense.phoneNumber,
+                expenseRepository: widget.expenseRepository,
+                settingsRepository: widget.settingsRepository,
+              ),
+            ),
+          ),
+        );
+      } else {
+        AppSnackbar.showError(
+          context: context,
+          message: 'Contact details unavailable for this transaction.',
+        );
+      }
+    } else {
+      _navigateToEditExpense(expense);
+    }
+  }
+
   void _navigateAndAddCashFlow() async {
     final newExpense = await Navigator.push<Expense>(
       context,
-      MaterialPageRoute(
-        builder: (context) => AddTodoScreen(
+      AppTransitions.slideUp<Expense>(
+        page: AddTodoScreen(
           allowedTypes: TransactionType.cashFlowTypes,
           title: 'Add Income or Expense',
           settingsRepository: widget.settingsRepository,
@@ -229,8 +258,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 expense.contactName!.isNotEmpty) {
                               await Navigator.push(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) => ContactDetailScreen(
+                                AppTransitions.slideRight(
+                                  page: ContactDetailScreen(
                                     contactName: expense.contactName!,
                                     phoneNumber: expense.phoneNumber,
                                     expenseRepository: widget.expenseRepository,
@@ -240,10 +269,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               );
                             } else {
-                              AppSnackbar.show(
+                              AppSnackbar.showError(
                                 context: context,
                                 message:
-                                    'No contact associated with this transaction',
+                                    'Contact details unavailable for this transaction.',
                               );
                             }
                             return false;
@@ -308,7 +337,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         child: GestureDetector(
-                          onTap: () => _navigateToEditExpense(expense),
+                          onTap: () => _onExpenseTileTap(expense),
                           child: ExpenseTile(
                             expense: expense,
                             currencySymbol: currencySymbol,
@@ -500,7 +529,10 @@ class _HomeScreenState extends State<HomeScreen> {
               : null,
         ),
         body: AppBackground(
-          child: IndexedStack(index: _selectedIndex, children: pages),
+          child: AppTransitions.tabSwitch(
+            index: _selectedIndex,
+            child: pages[_selectedIndex],
+          ),
         ),
         floatingActionButton: _selectedIndex == 0
             ? PressScale(

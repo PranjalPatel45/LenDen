@@ -32,6 +32,7 @@ class TransactionForm extends StatelessWidget {
     this.selectedCategory,
     this.categories = const [],
     this.onCategoryChanged,
+    this.isSubmitting = false,
     this.typeItemTextColor = AppColors.primaryText,
     this.submitColor = AppColors.highlight,
     this.submitForegroundColor = AppColors.white,
@@ -57,6 +58,7 @@ class TransactionForm extends StatelessWidget {
   final String? selectedCategory;
   final List<String> categories;
   final ValueChanged<String>? onCategoryChanged;
+  final bool isSubmitting;
   final Color typeItemTextColor;
   final Color submitColor;
   final Color submitForegroundColor;
@@ -164,7 +166,7 @@ class TransactionForm extends StatelessWidget {
                   const SizedBox(width: 15),
                   Expanded(
                     child: GlassButton(
-                      onPressed: onSubmit,
+                      onPressed: isSubmitting ? null : onSubmit,
                       radius: 14,
                       color: submitColor,
                       foregroundColor: submitForegroundColor,

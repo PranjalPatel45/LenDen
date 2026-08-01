@@ -12,6 +12,7 @@ import 'contact_detail_screen.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_design.dart';
 import '../utils/app_motion.dart';
+import '../utils/app_transitions.dart';
 import '../widget/glass_widgets.dart';
 
 class ConnectScreen extends StatefulWidget {
@@ -264,8 +265,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
         final Map<String, Expense> lastContactExpense = {};
 
         for (final expense in contactExpenses) {
-          final cName = expense.contactName ?? expense.title;
-          if (cName.isEmpty) continue;
+          final cName = expense.contactName;
+          if (cName == null || cName.trim().isEmpty) continue;
 
           if (expense.type == TransactionType.lent) {
             totalLent += expense.amount;
@@ -490,8 +491,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                 unawaited(
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ContactDetailScreen(
+                                    AppTransitions.slideRight(
+                                      page: ContactDetailScreen(
                                         contactName: name,
                                         phoneNumber: phone,
                                         expenseRepository: widget.expenseRepository,
@@ -646,8 +647,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                 unawaited(
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ContactDetailScreen(
+                                    AppTransitions.slideRight(
+                                      page: ContactDetailScreen(
                                         contactName: contact.displayName ?? 'No Name',
                                         phoneNumber: phone != 'No phone number' ? phone : null,
                                         expenseRepository: widget.expenseRepository,

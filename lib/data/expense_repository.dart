@@ -20,16 +20,16 @@ class ExpenseRepository {
 
   Future<int> add(Expense expense) => _box.add(expense);
 
-  Future<int> delete(Expense expense) async {
+  Future<dynamic> delete(Expense expense) async {
     final key = expense.key;
-    if (key is! int) {
+    if (key == null) {
       throw StateError('Cannot delete an expense without a Hive key.');
     }
     await _box.delete(key);
     return key;
   }
 
-  Future<void> restore(Expense expense, {int? originalKey}) async {
+  Future<void> restore(Expense expense, {dynamic originalKey}) async {
     if (originalKey == null) {
       await _box.add(expense);
       return;

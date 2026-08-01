@@ -12,13 +12,23 @@ bool isExpenseForContact({
   required String? expenseContactName,
   required String contactName,
 }) {
-  if (expensePhoneNumber != null && contactPhoneNumber != null) {
+  final hasExpensePhone =
+      expensePhoneNumber != null && expensePhoneNumber.trim().isNotEmpty;
+  final hasContactPhone =
+      contactPhoneNumber != null && contactPhoneNumber.trim().isNotEmpty;
+
+  if (hasExpensePhone && hasContactPhone) {
     final expensePhone = normalizePhoneNumber(expensePhoneNumber);
     final contactPhone = normalizePhoneNumber(contactPhoneNumber);
-    return expensePhone.isNotEmpty && expensePhone == contactPhone;
+    if (expensePhone.isNotEmpty && contactPhone.isNotEmpty) {
+      return expensePhone == contactPhone;
+    }
   }
 
-  return expensePhoneNumber == null &&
-      contactPhoneNumber == null &&
-      expenseContactName == contactName;
+  if (expenseContactName != null && expenseContactName.trim().isNotEmpty) {
+    return expenseContactName.trim().toLowerCase() ==
+        contactName.trim().toLowerCase();
+  }
+
+  return false;
 }

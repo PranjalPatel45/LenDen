@@ -37,6 +37,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
   String? _selectedType;
   String? _selectedCategory;
   String _currencySymbol = '\$';
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -112,45 +113,54 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
               }
             },
             onCancel: () => Navigator.pop(context),
+            isSubmitting: _isSubmitting,
             onSubmit: () async {
-              final validation = validateExpenseInput(
-                title: titleController.text,
-                amountText: amountController.text,
-                date: dateController.text,
-                type: _selectedType,
-                allowedTypes: widget.allowedTypes,
-              );
-              if (!validation.isValid) {
-                AppSnackbar.showError(
-                  context: context,
-                  message: validation.errorMessage!,
+              if (_isSubmitting) return;
+              setState(() => _isSubmitting = true);
+              try {
+                final validation = validateExpenseInput(
+                  title: titleController.text,
+                  amountText: amountController.text,
+                  date: dateController.text,
+                  type: _selectedType,
+                  allowedTypes: widget.allowedTypes,
                 );
-                return;
-              }
-              final amount = validation.amount!;
+                if (!validation.isValid) {
+                  AppSnackbar.showError(
+                    context: context,
+                    message: validation.errorMessage!,
+                  );
+                  return;
+                }
+                final amount = validation.amount!;
 
-              if (_selectedCategory != null && _selectedCategory!.trim().isNotEmpty) {
-                await widget.settingsRepository.saveCategory(_selectedCategory!);
-              }
+                if (_selectedCategory != null && _selectedCategory!.trim().isNotEmpty) {
+                  await widget.settingsRepository.saveCategory(_selectedCategory!);
+                }
 
-              final reasonText = [
-                if (_selectedCategory != null && _selectedCategory!.trim().isNotEmpty)
-                  'Category: ${_selectedCategory!.trim()}',
-                if (reasonController.text.isNotEmpty) reasonController.text,
-              ].join(' | ');
+                final reasonText = [
+                  if (_selectedCategory != null && _selectedCategory!.trim().isNotEmpty)
+                    'Category: ${_selectedCategory!.trim()}',
+                  if (reasonController.text.isNotEmpty) reasonController.text,
+                ].join(' | ');
 
-              final newExpense = Expense(
-                title: titleController.text,
-                amount: amount,
-                date: dateController.text,
-                type: _selectedType!,
-                contactName: widget.prefillContactName,
-                phoneNumber: widget.prefillPhoneNumber,
-                reason: reasonText.isNotEmpty ? reasonText : null,
-              );
+                final newExpense = Expense(
+                  title: titleController.text,
+                  amount: amount,
+                  date: dateController.text,
+                  type: _selectedType!,
+                  contactName: widget.prefillContactName,
+                  phoneNumber: widget.prefillPhoneNumber,
+                  reason: reasonText.isNotEmpty ? reasonText : null,
+                );
 
-              if (context.mounted) {
-                Navigator.pop(context, newExpense);
+                if (context.mounted) {
+                  Navigator.pop(context, newExpense);
+                }
+              } finally {
+                if (mounted) {
+                  setState(() => _isSubmitting = false);
+                }
               }
             },
             submitLabel: 'Submit',

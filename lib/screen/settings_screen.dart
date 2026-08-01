@@ -9,6 +9,7 @@ import '../utils/app_colors.dart';
 import '../utils/app_snackbar.dart';
 import '../utils/currency_helper.dart';
 import '../utils/app_design.dart';
+import '../utils/app_transitions.dart';
 import '../widget/glass_widgets.dart';
 import 'lock_screen.dart';
 import 'recovery_questions_screen.dart';
@@ -63,8 +64,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _changePin() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => LockScreen(
+      AppTransitions.slideRight(
+        page: LockScreen(
           isChangePin: true,
           securityRepository: widget.securityRepository,
         ),
@@ -78,8 +79,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _manageRecoveryQuestions() async {
     final saved = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => RecoveryQuestionsScreen(
+      AppTransitions.slideRight<bool>(
+        page: RecoveryQuestionsScreen(
           securityRepository: widget.securityRepository,
         ),
       ),
@@ -325,9 +326,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveContent(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 22, 16, 28),
+    return ListenableBuilder(
+      listenable: widget.settingsRepository.listenable,
+      builder: (context, _) {
+        _currencySymbol = widget.settingsRepository.currencySymbol;
+        _currencyCode = widget.settingsRepository.currencyCode;
+
+        return ResponsiveContent(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 22, 16, 28),
         children: [
           const SectionLabel(label: 'Security', icon: Icons.shield_rounded),
           const SizedBox(height: 8),
@@ -437,7 +444,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
-  }
+  },
+);
+}
 
   String get _currencyName {
     for (var c in supportedCurrencies) {

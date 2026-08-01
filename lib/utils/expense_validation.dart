@@ -19,10 +19,15 @@ ExpenseValidationResult validateExpenseInput({
   required String? type,
   List<String>? allowedTypes,
 }) {
-  final amount = double.tryParse(amountText);
-  if (title.isEmpty || amount == null || date.isEmpty || type == null) {
+  if (title.trim().isEmpty || amountText.trim().isEmpty || date.trim().isEmpty || type == null) {
     return const ExpenseValidationResult.invalid(
       'Please fill in all required fields',
+    );
+  }
+  final amount = double.tryParse(amountText.trim());
+  if (amount == null) {
+    return const ExpenseValidationResult.invalid(
+      'Please enter a valid numeric amount',
     );
   }
   if (amount <= 0) {

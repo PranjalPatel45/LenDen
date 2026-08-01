@@ -310,8 +310,8 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
       } else {
         final saved = await Navigator.push<bool>(
           context,
-          MaterialPageRoute(
-            builder: (context) => RecoveryQuestionsScreen(
+          AppTransitions.slideUp<bool>(
+            page: RecoveryQuestionsScreen(
               pinToSave: pin,
               securityRepository: widget.securityRepository,
             ),
@@ -348,9 +348,8 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
   Future<void> _forgotPin() async {
     final newPin = await Navigator.push<String>(
       context,
-      MaterialPageRoute(
-        builder: (context) =>
-            ForgotPinScreen(securityRepository: widget.securityRepository),
+      AppTransitions.slideUp<String>(
+        page: ForgotPinScreen(securityRepository: widget.securityRepository),
       ),
     );
     if (newPin == null || !mounted) return;
@@ -375,8 +374,12 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (_isSetupMode || widget.isChangePin) return _buildSetupScreen();
-    return _buildUnlockScreen();
+    return PopScope(
+      canPop: widget.isChangePin,
+      child: (_isSetupMode || widget.isChangePin)
+          ? _buildSetupScreen()
+          : _buildUnlockScreen(),
+    );
   }
 
   Widget _buildSetupScreen() {
