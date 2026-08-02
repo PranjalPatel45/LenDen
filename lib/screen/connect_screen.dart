@@ -285,7 +285,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
         return ResponsiveContent(
           maxWidth: 760,
-          child: CustomScrollView(
+          child: RepaintBoundary(
+            child: CustomScrollView(
             slivers: [
               // 1. Financial Summary Card (Scrolls away)
               SliverToBoxAdapter(
@@ -672,10 +673,11 @@ class _ConnectScreenState extends State<ConnectScreen> {
               ),
             ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   Widget _buildExplanationView() {
     return ResponsiveContent(

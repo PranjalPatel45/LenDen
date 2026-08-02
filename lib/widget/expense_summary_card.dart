@@ -33,10 +33,11 @@ class ExpenseSummaryCard extends StatelessWidget {
         ? "THIS MONTH'S AVAILABLE BALANCE"
         : '${periodLabel.toUpperCase()} AVAILABLE BALANCE';
 
-    return EntranceMotion(
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-        child: GlassCard(
+    return RepaintBoundary(
+      child: EntranceMotion(
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+          child: GlassCard(
           radius: 20,
           padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
           child: Column(
@@ -216,6 +217,7 @@ class ExpenseSummaryCard extends StatelessWidget {
                 ),
               ],
             ),
+          ),
         ),
       ),
     );

@@ -394,7 +394,7 @@ class RecoveryAttemptState {
   final DateTime? cooldownUntil;
 
   factory RecoveryAttemptState.fresh(DateTime now) => RecoveryAttemptState(
-    day: _dayKey(now),
+    day: _formatDayKey(now),
     failedToday: 0,
     failedInCurrentGroup: 0,
   );
@@ -427,7 +427,7 @@ class RecoveryAttemptState {
   bool isLockedAt(DateTime now) => lockedUntil(now).isAfter(now);
 
   RecoveryAttemptState normalized(DateTime now) {
-    if (day != _dayKey(now)) return RecoveryAttemptState.fresh(now);
+    if (day != _formatDayKey(now)) return RecoveryAttemptState.fresh(now);
     if (cooldownUntil != null && !cooldownUntil!.isAfter(now)) {
       return RecoveryAttemptState(
         day: day,
@@ -465,13 +465,6 @@ class RecoveryAttemptState {
     'failedInCurrentGroup': failedInCurrentGroup,
     'cooldownUntil': cooldownUntil?.toUtc().toIso8601String(),
   };
-
-  static String _dayKey(DateTime value) {
-    final local = value.toLocal();
-    return '${local.year.toString().padLeft(4, '0')}-'
-        '${local.month.toString().padLeft(2, '0')}-'
-        '${local.day.toString().padLeft(2, '0')}';
-  }
 }
 
 class PinAttemptState {
@@ -492,7 +485,7 @@ class PinAttemptState {
   final DateTime? cooldownUntil;
 
   factory PinAttemptState.fresh(DateTime now) => PinAttemptState(
-    day: _dayKey(now),
+    day: _formatDayKey(now),
     failedToday: 0,
     failedInCurrentGroup: 0,
   );
@@ -525,7 +518,7 @@ class PinAttemptState {
   bool isLockedAt(DateTime now) => lockedUntil(now).isAfter(now);
 
   PinAttemptState normalized(DateTime now) {
-    if (day != _dayKey(now)) return PinAttemptState.fresh(now);
+    if (day != _formatDayKey(now)) return PinAttemptState.fresh(now);
     if (cooldownUntil != null && !cooldownUntil!.isAfter(now)) {
       return PinAttemptState(
         day: day,
@@ -574,11 +567,11 @@ class PinAttemptState {
     'failedInCurrentGroup': failedInCurrentGroup,
     'cooldownUntil': cooldownUntil?.toUtc().toIso8601String(),
   };
+}
 
-  static String _dayKey(DateTime value) {
-    final local = value.toLocal();
-    return '${local.year.toString().padLeft(4, '0')}-'
-        '${local.month.toString().padLeft(2, '0')}-'
-        '${local.day.toString().padLeft(2, '0')}';
-  }
+String _formatDayKey(DateTime value) {
+  final local = value.toLocal();
+  return '${local.year.toString().padLeft(4, '0')}-'
+      '${local.month.toString().padLeft(2, '0')}-'
+      '${local.day.toString().padLeft(2, '0')}';
 }

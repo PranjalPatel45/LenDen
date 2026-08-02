@@ -35,6 +35,11 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   String _currencySymbol = '\$';
   bool _isSaving = false;
 
+  bool get _isContactTransaction =>
+      TransactionType.isContactType(widget.expense.type) ||
+      (widget.expense.contactName != null &&
+          widget.expense.contactName!.trim().isNotEmpty);
+
   List<String> get _allowedTypes {
     if (TransactionType.cashFlowTypes.contains(widget.expense.type)) {
       return TransactionType.cashFlowTypes;
@@ -48,7 +53,12 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   @override
   void initState() {
     super.initState();
-    titleController = TextEditingController(text: widget.expense.title);
+    final initialTitle = _isContactTransaction
+        ? (widget.expense.contactName?.trim().isNotEmpty == true
+            ? widget.expense.contactName!
+            : widget.expense.title)
+        : widget.expense.title;
+    titleController = TextEditingController(text: initialTitle);
     amountController = TextEditingController(
       text: widget.expense.amount.toString(),
     );
@@ -88,6 +98,13 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
             allowedTypes: _allowedTypes,
             currencySymbol: _currencySymbol,
             typeItemTextColor: AppColors.primaryText,
+            titleFieldLabel: _isContactTransaction
+                ? 'Contact Person (Locked)'
+                : 'Title',
+            isTitleReadOnly: _isContactTransaction,
+            titleFieldPrefixIcon: _isContactTransaction
+                ? const Icon(Icons.person_outline_rounded, color: AppColors.grey)
+                : null,
             onTypeChanged: (value) => setState(() => _selectedType = value),
             onDateTap: () async {
               final pickedDate = await showDatePicker(
@@ -124,13 +141,18 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
               _isSaving = true;
 
               final previousTitle = widget.expense.title;
+              final previousContactName = widget.expense.contactName;
               final previousAmount = widget.expense.amount;
               final previousDate = widget.expense.date;
               final previousType = widget.expense.type;
               final previousReason = widget.expense.reason;
 
               try {
-                widget.expense.title = titleController.text;
+                if (_isContactTransaction) {
+                  widget.expense.contactName = previousContactName;
+                } else {
+                  widget.expense.title = titleController.text;
+                }
                 widget.expense.amount = amount;
                 widget.expense.date = dateController.text;
                 widget.expense.type = _selectedType!;
@@ -149,6 +171,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                 Navigator.pop(context);
               } catch (e) {
                 widget.expense.title = previousTitle;
+                widget.expense.contactName = previousContactName;
                 widget.expense.amount = previousAmount;
                 widget.expense.date = previousDate;
                 widget.expense.type = previousType;

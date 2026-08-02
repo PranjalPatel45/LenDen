@@ -16,7 +16,7 @@ class ExpenseRepository {
 
   ValueListenable<Box<Expense>> get listenable => _box.listenable();
 
-  List<Expense> getAll() => _box.values.toList(growable: false);
+  List<Expense> getAll() => List<Expense>.unmodifiable(_box.values);
 
   Future<int> add(Expense expense) => _box.add(expense);
 

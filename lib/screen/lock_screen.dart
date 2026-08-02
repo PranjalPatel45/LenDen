@@ -758,40 +758,42 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
                                 },
                                 child: IgnorePointer(
                                   ignoring: _isPinLocked || _isVerifyingPin,
-                                  child: AnimatedOpacity(
-                                    opacity: _isPinLocked ? 0.38 : 1,
-                                    duration: const Duration(milliseconds: 200),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          _buildNumberRow([
-                                            '1',
-                                            '2',
-                                            '3',
-                                          ], keySize),
-                                          const SizedBox(height: 6),
-                                          _buildNumberRow([
-                                            '4',
-                                            '5',
-                                            '6',
-                                          ], keySize),
-                                          const SizedBox(height: 6),
-                                          _buildNumberRow([
-                                            '7',
-                                            '8',
-                                            '9',
-                                          ], keySize),
-                                          const SizedBox(height: 6),
-                                          _buildNumberRow([
-                                            '',
-                                            '0',
-                                            'delete',
-                                          ], keySize),
-                                        ],
+                                  child: RepaintBoundary(
+                                    child: AnimatedOpacity(
+                                      opacity: _isPinLocked ? 0.38 : 1,
+                                      duration: const Duration(milliseconds: 200),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            _buildNumberRow([
+                                              '1',
+                                              '2',
+                                              '3',
+                                            ], keySize),
+                                            const SizedBox(height: 6),
+                                            _buildNumberRow([
+                                              '4',
+                                              '5',
+                                              '6',
+                                            ], keySize),
+                                            const SizedBox(height: 6),
+                                            _buildNumberRow([
+                                              '7',
+                                              '8',
+                                              '9',
+                                            ], keySize),
+                                            const SizedBox(height: 6),
+                                            _buildNumberRow([
+                                              '',
+                                              '0',
+                                              'delete',
+                                            ], keySize),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
