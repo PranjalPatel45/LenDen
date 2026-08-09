@@ -86,7 +86,8 @@ class AppSnackbar {
   static void hide(BuildContext context) {
     _OverlaySnackbarState? state;
     context.visitAncestorElements((element) {
-      if (element is StatefulElement && element.state is _OverlaySnackbarState) {
+      if (element is StatefulElement &&
+          element.state is _OverlaySnackbarState) {
         state = element.state as _OverlaySnackbarState;
         return false;
       }
@@ -172,16 +173,14 @@ class _OverlaySnackbarState extends State<_OverlaySnackbar>
       duration: const Duration(milliseconds: 240),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.38),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.easeInCubic,
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.38), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          ),
+        );
 
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
@@ -271,7 +270,8 @@ class _OverlaySnackbarState extends State<_OverlaySnackbar>
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (widget.actionLabel != null && widget.onAction != null) ...[
+                    if (widget.actionLabel != null &&
+                        widget.onAction != null) ...[
                       const SizedBox(width: 12),
                       InkWell(
                         borderRadius: BorderRadius.circular(8),

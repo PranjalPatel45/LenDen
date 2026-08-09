@@ -327,7 +327,9 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                       currencySymbol: currencySymbol,
                       onEdit: () => _navigateToEditExpense(expense),
                       onDelete: () => deleteExpenseWithUndo(
-                        context: context,
+                        // The list item context can unmount during deletion;
+                        // keep the stable screen context for the Undo overlay.
+                        context: this.context,
                         expense: expense,
                         expenseRepository: widget.expenseRepository,
                         restoredKeys: _restoredExpenseKeys,

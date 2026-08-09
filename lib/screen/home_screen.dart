@@ -256,7 +256,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () => _onExpenseTileTap(expense),
                         onEdit: () => _navigateToEditExpense(expense),
                         onDelete: () => deleteExpenseWithUndo(
-                          context: context,
+                          // The list item context can unmount as soon as Hive
+                          // removes this row. Use the screen context so the
+                          // post-delete Undo SnackBar can still be displayed.
+                          context: this.context,
                           expense: expense,
                           expenseRepository: widget.expenseRepository,
                           restoredKeys: _restoredExpenseKeys,

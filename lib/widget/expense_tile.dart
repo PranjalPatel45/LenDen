@@ -32,8 +32,7 @@ class TransactionSwipeTile extends StatefulWidget {
 class _TransactionSwipeTileState extends State<TransactionSwipeTile>
     with TickerProviderStateMixin {
   static const double _actionExtent = 164;
-  static const double _deleteTriggerExtent = 248;
-  static const double _dragResistanceExtent = 286;
+  static const double _deleteSlideExtent = 286;
   static final ValueNotifier<Object?> _openTileKey = ValueNotifier<Object?>(
     null,
   );
@@ -133,7 +132,7 @@ class _TransactionSwipeTileState extends State<TransactionSwipeTile>
   void _handleDragUpdate(DragUpdateDetails details) {
     if (_deleting) return;
     final nextOffset = (_offset + details.delta.dx)
-        .clamp(-_dragResistanceExtent, 0.0)
+        .clamp(-_actionExtent, 0.0)
         .toDouble();
     if (nextOffset == _offset) return;
     if (nextOffset < 0) _openTileKey.value = _tileKey;
@@ -142,14 +141,7 @@ class _TransactionSwipeTileState extends State<TransactionSwipeTile>
 
   void _handleDragEnd(DragEndDetails details) {
     if (_deleting) return;
-    final flingLeft =
-        details.primaryVelocity != null &&
-        details.primaryVelocity! < -760 &&
-        _offset < -_actionExtent;
-
-    if (_offset <= -_deleteTriggerExtent || flingLeft) {
-      unawaited(_delete());
-    } else if (_offset <= -44) {
+    if (_offset <= -44) {
       _open();
     } else {
       _close();
@@ -164,7 +156,7 @@ class _TransactionSwipeTileState extends State<TransactionSwipeTile>
       ..stop()
       ..value = _offset;
     await _slideController.animateTo(
-      -_dragResistanceExtent,
+      -_deleteSlideExtent,
       duration: motionDuration(context, const Duration(milliseconds: 150)),
       curve: Curves.easeOutCubic,
     );

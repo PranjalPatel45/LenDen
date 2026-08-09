@@ -29,6 +29,7 @@ Future<void> deleteExpenseWithUndo({
     return;
   }
   if (!context.mounted) return;
+
   showDeletionUndoSnackBar(
     context,
     message: 'Transaction deleted',
