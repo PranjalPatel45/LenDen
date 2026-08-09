@@ -142,10 +142,12 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
               String dynamicStatus;
               Color statusColor;
               if (netBalance > 0) {
-                dynamicStatus = '${widget.contactName} owes you ${formatCurrency(netBalance, currencySymbol)}';
+                dynamicStatus =
+                    '${widget.contactName} owes you ${formatCurrency(netBalance, currencySymbol)}';
                 statusColor = AppColors.lendColorDark;
               } else if (netBalance < 0) {
-                dynamicStatus = 'You owe ${widget.contactName} ${formatCurrency(netBalance.abs(), currencySymbol)}';
+                dynamicStatus =
+                    'You owe ${widget.contactName} ${formatCurrency(netBalance.abs(), currencySymbol)}';
                 statusColor = AppColors.borrowedColorDark;
               } else {
                 dynamicStatus = 'All settled up with ${widget.contactName}';
@@ -156,7 +158,9 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                 maxWidth: 760,
                 child: ListView.builder(
                   padding: const EdgeInsets.only(top: 12, bottom: 88),
-                  itemCount: contactExpenses.isEmpty ? 1 : contactExpenses.length + 1,
+                  itemCount: contactExpenses.isEmpty
+                      ? 1
+                      : contactExpenses.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
                       return Padding(
@@ -170,7 +174,8 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                               Row(
                                 children: [
                                   CircleAvatar(
-                                    backgroundColor: AppColors.highlight.withValues(alpha: 0.12),
+                                    backgroundColor: AppColors.highlight
+                                        .withValues(alpha: 0.12),
                                     child: Text(
                                       widget.contactName.isNotEmpty
                                           ? widget.contactName[0].toUpperCase()
@@ -184,7 +189,8 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           widget.contactName,
@@ -193,12 +199,14 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                                             fontWeight: FontWeight.w800,
                                           ),
                                         ),
-                                        if (widget.phoneNumber != null && widget.phoneNumber!.isNotEmpty)
+                                        if (widget.phoneNumber != null &&
+                                            widget.phoneNumber!.isNotEmpty)
                                           Text(
                                             widget.phoneNumber!,
                                             style: TextStyle(
                                               fontSize: 13,
-                                              color: AppColors.primaryText.withValues(alpha: 0.6),
+                                              color: AppColors.primaryText
+                                                  .withValues(alpha: 0.6),
                                             ),
                                           ),
                                       ],
@@ -209,11 +217,16 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                               const SizedBox(height: 16),
                               Container(
                                 width: double.infinity,
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: statusColor.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: statusColor.withValues(alpha: 0.2)),
+                                  border: Border.all(
+                                    color: statusColor.withValues(alpha: 0.2),
+                                  ),
                                 ),
                                 child: Text(
                                   dynamicStatus,
@@ -235,12 +248,16 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                                           'Lent',
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: AppColors.primaryText.withValues(alpha: 0.6),
+                                            color: AppColors.primaryText
+                                                .withValues(alpha: 0.6),
                                           ),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          formatCurrency(totalLent, currencySymbol),
+                                          formatCurrency(
+                                            totalLent,
+                                            currencySymbol,
+                                          ),
                                           style: const TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700,
@@ -250,7 +267,13 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                                       ],
                                     ),
                                   ),
-                                  Container(height: 30, width: 1, color: AppColors.primaryText.withValues(alpha: 0.1)),
+                                  Container(
+                                    height: 30,
+                                    width: 1,
+                                    color: AppColors.primaryText.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                  ),
                                   Expanded(
                                     child: Column(
                                       children: [
@@ -258,12 +281,16 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                                           'Borrowed',
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: AppColors.primaryText.withValues(alpha: 0.6),
+                                            color: AppColors.primaryText
+                                                .withValues(alpha: 0.6),
                                           ),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          formatCurrency(totalBorrowed, currencySymbol),
+                                          formatCurrency(
+                                            totalBorrowed,
+                                            currencySymbol,
+                                          ),
                                           style: const TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700,
@@ -287,57 +314,40 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                         child: GlassEmptyState(
                           icon: Icons.receipt_long_outlined,
                           title: 'No transactions',
-                          message: 'Tap "Lend / Borrow" below to add a transaction with ${widget.contactName}.',
+                          message:
+                              'Tap "Lend / Borrow" below to add a transaction with ${widget.contactName}.',
                         ),
                       );
                     }
 
                     final expense = contactExpenses[index - 1];
-                    final dismissible = Dismissible(
-                      key: Key(expense.key.toString()),
-                      direction: DismissDirection.endToStart,
-                      onDismissed: (direction) async {
-                        if (direction == DismissDirection.endToStart) {
-                          await deleteExpenseWithUndo(
-                            context: context,
-                            expense: expense,
-                            expenseRepository: widget.expenseRepository,
-                            restoredKeys: _restoredExpenseKeys,
-                            onStateChanged: () => setState(() {}),
-                          );
-                        }
-                      },
-                      secondaryBackground: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          color: AppColors.borrowColor,
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        alignment: Alignment.centerRight,
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      background: const SizedBox.shrink(),
-                      child: GestureDetector(
-                        onTap: () => _navigateToEditExpense(expense),
-                        child: ExpenseTile(
-                          expense: expense,
-                          currencySymbol: currencySymbol,
-                        ),
+                    final swipeTile = TransactionSwipeTile(
+                      key: ValueKey('contact-swipe-expense-${expense.key}'),
+                      expense: expense,
+                      currencySymbol: currencySymbol,
+                      onEdit: () => _navigateToEditExpense(expense),
+                      onDelete: () => deleteExpenseWithUndo(
+                        context: context,
+                        expense: expense,
+                        expenseRepository: widget.expenseRepository,
+                        restoredKeys: _restoredExpenseKeys,
+                        onStateChanged: () => setState(() {}),
                       ),
                     );
 
                     if (_restoredExpenseKeys.contains(expense.key)) {
                       return RestoreMotion(
-                        key: ValueKey('restored-contact-expense-${expense.key}'),
-                        child: dismissible,
+                        key: ValueKey(
+                          'restored-contact-expense-${expense.key}',
+                        ),
+                        child: swipeTile,
                       );
                     }
 
                     return EntranceMotion(
                       key: ValueKey('contact-expense-${expense.key}'),
                       order: index - 1,
-                      child: dismissible,
+                      child: swipeTile,
                     );
                   },
                 ),

@@ -368,13 +368,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onTap: _manageRecoveryQuestions,
                   ),
                 if (_canCheckBiometrics)
-                  ListTile(
-                    leading: const GlassIcon(icon: Icons.fingerprint_rounded),
-                    title: const Text('Biometric'),
+                  SwitchListTile(
+                    secondary: const GlassIcon(icon: Icons.fingerprint_rounded),
+                    title: const Text('Biometric Unlock'),
                     subtitle: Text(
-                      'Available on this device',
-                      style: TextStyle(color: AppColors.primaryText),
+                      !_hasPin
+                          ? 'Set a PIN to enable biometric unlock'
+                          : (widget.settingsRepository.isBiometricEnabled
+                              ? 'Unlock app with biometrics'
+                              : 'Biometric unlock disabled'),
                     ),
+                    value: _hasPin && widget.settingsRepository.isBiometricEnabled,
+                    onChanged: !_hasPin
+                        ? null
+                        : (value) async {
+                            await widget.settingsRepository.setBiometricEnabled(value);
+                            if (mounted) setState(() {});
+                          },
                   ),
               ],
             ),

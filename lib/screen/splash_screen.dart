@@ -34,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1100),
     );
     _logoScale = Tween<double>(begin: 0.72, end: 1).animate(
       CurvedAnimation(
@@ -65,7 +65,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _openApp() async {
     try {
       await Future.wait<void>([
-        Future<void>.delayed(const Duration(milliseconds: 1800)),
+        Future<void>.delayed(const Duration(milliseconds: 1200)),
         ?widget.initialization,
       ]);
     } catch (_) {
@@ -129,40 +129,33 @@ class _SplashScreenState extends State<SplashScreen>
                             ),
                           ),
                           const SizedBox(height: 42),
-                          // Enhanced progress indicator with animation
-                          TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0, end: 1),
-                            duration: const Duration(milliseconds: 800),
-                            curve: Curves.easeOutCubic,
-                            builder: (context, value, child) {
-                              return Opacity(
-                                opacity: _progress.value * value,
-                                child: Container(
-                                  width: 140,
-                                  height: 6,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppColors.highlight.withValues(
-                                          alpha: 0.3,
-                                        ),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
+                          Opacity(
+                            opacity: _progress.value,
+                            child: Container(
+                              width: 140,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.highlight.withValues(
+                                      alpha: 0.22,
+                                    ),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
                                   ),
-                                  child: LinearProgressIndicator(
-                                    value: _progress.value,
-                                    minHeight: 6,
-                                    borderRadius: BorderRadius.circular(10),
-                                    backgroundColor: AppColors.primary
-                                        .withValues(alpha: 0.16),
-                                    color: AppColors.highlight,
-                                  ),
+                                ],
+                              ),
+                              child: LinearProgressIndicator(
+                                value: _progress.value,
+                                minHeight: 6,
+                                borderRadius: BorderRadius.circular(10),
+                                backgroundColor: AppColors.primary.withValues(
+                                  alpha: 0.16,
                                 ),
-                              );
-                            },
+                                color: AppColors.highlight,
+                              ),
+                            ),
                           ),
                           if (_startupFailed) ...[
                             const SizedBox(height: 24),

@@ -100,7 +100,7 @@ class _EntranceMotionState extends State<EntranceMotion>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 320),
+      duration: AppMotion.standard,
     );
     final curve = CurvedAnimation(
       parent: _controller,
@@ -125,7 +125,7 @@ class _EntranceMotionState extends State<EntranceMotion>
     }
 
     // Clamp staggering so long lists never create a long animation queue.
-    final delay = Duration(milliseconds: widget.order.clamp(0, 5) * 28);
+    final delay = Duration(milliseconds: widget.order.clamp(0, 4) * 16);
     if (delay == Duration.zero) {
       unawaited(_controller.forward());
     } else {
@@ -179,7 +179,7 @@ class _RestoreMotionState extends State<RestoreMotion>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 480),
+      duration: const Duration(milliseconds: 340),
     );
     final curve = CurvedAnimation(
       parent: _controller,
@@ -190,7 +190,7 @@ class _RestoreMotionState extends State<RestoreMotion>
       curve: const Interval(0, 0.72, curve: Curves.easeOut),
     );
     _size = curve;
-    _scale = Tween<double>(begin: 0.96, end: 1).animate(curve);
+    _scale = Tween<double>(begin: 0.985, end: 1).animate(curve);
     _slide = Tween<Offset>(
       begin: const Offset(-0.06, 0),
       end: Offset.zero,
@@ -256,11 +256,11 @@ class _LoadingPulseState extends State<LoadingPulse>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 1200),
     );
     final curve = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
-    _scale = Tween<double>(begin: 0.96, end: 1).animate(curve);
-    _opacity = Tween<double>(begin: 0.72, end: 1).animate(curve);
+    _scale = Tween<double>(begin: 0.98, end: 1).animate(curve);
+    _opacity = Tween<double>(begin: 0.82, end: 1).animate(curve);
   }
 
   @override

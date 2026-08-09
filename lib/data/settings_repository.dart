@@ -11,6 +11,8 @@ class SettingsRepository {
   static const String _allowScreenshotsKey = 'allow_screenshots';
   static const String _userNameKey = 'user_name';
   static const String _hasCompletedOnboardingKey = 'has_completed_onboarding';
+  static const String _isBiometricEnabledKey = 'is_biometric_enabled';
+  static const String _preferPinOverBiometricKey = 'prefer_pin_over_biometric';
 
   Box<dynamic> get _box => Hive.box<dynamic>(boxName);
 
@@ -93,5 +95,20 @@ class SettingsRepository {
 
   Future<void> setHasCompletedOnboarding(bool completed) async {
     await _box.put(_hasCompletedOnboardingKey, completed);
+  }
+
+  bool get isBiometricEnabled =>
+      _box.get(_isBiometricEnabledKey, defaultValue: true) as bool;
+
+  bool get preferPinOverBiometric =>
+      _box.get(_preferPinOverBiometricKey, defaultValue: false) as bool;
+
+  Future<void> setBiometricEnabled(bool enabled) async {
+    await _box.put(_isBiometricEnabledKey, enabled);
+    await setPreferPinOverBiometric(false);
+  }
+
+  Future<void> setPreferPinOverBiometric(bool prefer) async {
+    await _box.put(_preferPinOverBiometricKey, prefer);
   }
 }

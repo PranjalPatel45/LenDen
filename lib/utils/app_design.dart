@@ -24,11 +24,11 @@ abstract final class AppSize {
 }
 
 abstract final class AppMotion {
-  static const Duration quick = Duration(milliseconds: 150);
-  static const Duration quickRoute = Duration(milliseconds: 190);
-  static const Duration route = Duration(milliseconds: 210);
-  static const Duration modal = Duration(milliseconds: 220);
-  static const Duration standard = Duration(milliseconds: 260);
+  static const Duration quick = Duration(milliseconds: 120);
+  static const Duration quickRoute = Duration(milliseconds: 150);
+  static const Duration route = Duration(milliseconds: 180);
+  static const Duration modal = Duration(milliseconds: 190);
+  static const Duration standard = Duration(milliseconds: 220);
 
   /// Easing shared by full-screen route transitions.
   static const Curve routeCurve = Curves.easeOutCubic;

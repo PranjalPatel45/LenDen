@@ -70,7 +70,10 @@ class SecurityRepository {
   Future<void> removePin() async {
     await _storage.delete(key: _appPinKey);
     if (Hive.isBoxOpen(_settingsBoxName)) {
-      await Hive.box<dynamic>(_settingsBoxName).delete(_pinBackupKey);
+      final box = Hive.box<dynamic>(_settingsBoxName);
+      await box.delete(_pinBackupKey);
+      await box.delete('is_biometric_enabled');
+      await box.delete('prefer_pin_over_biometric');
     }
     await _storage.delete(key: _pinAttemptStateKey);
     await _storage.delete(key: _recoveryQuestionsKey);

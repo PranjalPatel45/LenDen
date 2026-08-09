@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../utils/app_colors.dart';
+import '../utils/app_design.dart';
 import '../utils/app_motion.dart';
 
 /// A restrained floating navigation surface. The glass is concentrated here
@@ -38,7 +39,7 @@ class AppNavBar extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(22),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: AppColors.glassNav,
@@ -84,7 +85,7 @@ class AppNavBar extends StatelessWidget {
               child: AnimatedContainer(
                 duration: motionDuration(
                   context,
-                  const Duration(milliseconds: 220),
+                  AppMotion.standard,
                 ),
                 curve: Curves.easeOutCubic,
                 decoration: BoxDecoration(
@@ -107,7 +108,7 @@ class AppNavBar extends StatelessWidget {
                     AnimatedDefaultTextStyle(
                       duration: motionDuration(
                         context,
-                        const Duration(milliseconds: 180),
+                        AppMotion.quick,
                       ),
                       style: TextStyle(
                         fontSize: 11,

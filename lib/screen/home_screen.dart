@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     } else {
-      _navigateToEditExpense(expense);
+      return;
     }
   }
 
@@ -249,111 +249,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final expense = filteredExpenses[index];
-                      final dismissible = Dismissible(
-                        key: Key(expense.key.toString()),
-                        direction: DismissDirection.horizontal,
-                        confirmDismiss: (direction) async {
-                          if (direction == DismissDirection.startToEnd) {
-                            if (expense.contactName != null &&
-                                expense.contactName!.isNotEmpty) {
-                              await Navigator.push(
-                                context,
-                                AppTransitions.slideRight(
-                                  page: ContactDetailScreen(
-                                    contactName: expense.contactName!,
-                                    phoneNumber: expense.phoneNumber,
-                                    expenseRepository: widget.expenseRepository,
-                                    settingsRepository:
-                                        widget.settingsRepository,
-                                  ),
-                                ),
-                              );
-                            } else {
-                              AppSnackbar.showError(
-                                context: context,
-                                message:
-                                    'Contact details unavailable for this transaction.',
-                              );
-                            }
-                            return false;
-                          }
-                          return true;
-                        },
-                        onDismissed: (direction) async {
-                          if (direction == DismissDirection.endToStart) {
-                            await deleteExpenseWithUndo(
-                              context: context,
-                              expense: expense,
-                              expenseRepository: widget.expenseRepository,
-                              restoredKeys: _restoredExpenseKeys,
-                              onStateChanged: () => setState(() {}),
-                            );
-                          }
-                        },
-                        background: Container(
-                          margin: const EdgeInsets.symmetric(
-                            vertical: 8,
-                            horizontal: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: AppColors.highlight,
-                          ),
-                          alignment: Alignment.centerLeft,
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: const Row(
-                            children: [
-                              Icon(
-                                Icons.person_rounded,
-                                color: AppColors.white,
-                                size: 24,
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                'Contact',
-                                style: TextStyle(
-                                  color: AppColors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        secondaryBackground: Container(
-                          margin: const EdgeInsets.symmetric(
-                            vertical: 8,
-                            horizontal: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: AppColors.borrowColor,
-                          ),
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: const Icon(
-                            Icons.delete_rounded,
-                            color: AppColors.white,
-                            size: 28,
-                          ),
-                        ),
-                        child: GestureDetector(
-                          onTap: () => _onExpenseTileTap(expense),
-                          child: ExpenseTile(
-                            expense: expense,
-                            currencySymbol: currencySymbol,
-                          ),
+                      final swipeTile = TransactionSwipeTile(
+                        key: ValueKey('swipe-expense-${expense.key}'),
+                        expense: expense,
+                        currencySymbol: currencySymbol,
+                        onTap: () => _onExpenseTileTap(expense),
+                        onEdit: () => _navigateToEditExpense(expense),
+                        onDelete: () => deleteExpenseWithUndo(
+                          context: context,
+                          expense: expense,
+                          expenseRepository: widget.expenseRepository,
+                          restoredKeys: _restoredExpenseKeys,
+                          onStateChanged: () => setState(() {}),
                         ),
                       );
                       if (_restoredExpenseKeys.contains(expense.key)) {
                         return RestoreMotion(
                           key: ValueKey('restored-expense-${expense.key}'),
-                          child: dismissible,
+                          child: swipeTile,
                         );
                       }
                       return EntranceMotion(
                         key: ValueKey('expense-${expense.key}'),
                         order: index,
-                        child: dismissible,
+                        child: swipeTile,
                       );
                     }, childCount: filteredExpenses.length),
                   ),

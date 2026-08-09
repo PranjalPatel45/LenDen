@@ -19,11 +19,13 @@ import 'recovery_questions_screen.dart';
 class LockScreen extends StatefulWidget {
   final bool isChangePin;
   final SecurityRepository securityRepository;
+  final SettingsRepository settingsRepository;
 
   const LockScreen({
     super.key,
     this.isChangePin = false,
     this.securityRepository = const SecurityRepository(),
+    this.settingsRepository = const SettingsRepository(),
   });
 
   @override
@@ -39,6 +41,7 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
   bool _canCheckBiometrics = false;
   bool _isWrongPin = false;
   bool _isVerifyingPin = false;
+  bool _hasAutoPromptedBiometrics = false;
   PinAttemptState? _pinAttemptState;
   Timer? _lockoutTimer;
 
@@ -59,15 +62,14 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
     super.initState();
     _setupEntryAnimations();
     _setupShakeAnimation();
-    unawaited(_checkSetup());
-    unawaited(_checkBiometrics());
+    unawaited(_checkSetupAndBiometrics());
     unawaited(_entryController.forward());
   }
 
   void _setupEntryAnimations() {
     _entryController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 820),
     );
     _fadeIn = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -75,13 +77,13 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
         curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
       ),
     );
-    _scaleIn = Tween<double>(begin: 0.85, end: 1.0).animate(
+    _scaleIn = Tween<double>(begin: 0.94, end: 1.0).animate(
       CurvedAnimation(
         parent: _entryController,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
       ),
     );
-    _slideUp = Tween<Offset>(begin: const Offset(0, 30), end: Offset.zero)
+    _slideUp = Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero)
         .animate(
           CurvedAnimation(
             parent: _entryController,
@@ -93,10 +95,10 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
   void _setupShakeAnimation() {
     _shakeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 360),
     );
     _shakeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _shakeController, curve: Curves.elasticIn),
+      CurvedAnimation(parent: _shakeController, curve: Curves.easeOutCubic),
     );
   }
 
@@ -111,33 +113,47 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> _checkBiometrics() async {
-    try {
-      final canCheck = await _localAuth.canCheckBiometrics;
-      final availableBiometrics = await _localAuth.getAvailableBiometrics();
-      if (!mounted) return;
-      setState(() {
-        _canCheckBiometrics = canCheck && availableBiometrics.isNotEmpty;
-      });
-    } on LocalAuthException {
-      if (!mounted) return;
-      setState(() {
-        _canCheckBiometrics = false;
-      });
-    }
-  }
-
-  Future<void> _checkSetup() async {
+  Future<void> _checkSetupAndBiometrics() async {
     final hasPin = await widget.securityRepository.hasPin();
     final attemptState = !hasPin
         ? null
         : await widget.securityRepository.readPinAttemptState();
+
+    bool canBio = false;
+    if (hasPin) {
+      try {
+        final canCheck = await _localAuth.canCheckBiometrics;
+        final availableBiometrics = await _localAuth.getAvailableBiometrics();
+        canBio = canCheck && availableBiometrics.isNotEmpty;
+      } on LocalAuthException {
+        canBio = false;
+      } catch (_) {
+        canBio = false;
+      }
+    }
+
     if (!mounted) return;
     setState(() {
       _isSetupMode = !hasPin;
       _pinAttemptState = attemptState;
+      _canCheckBiometrics = canBio;
     });
     _updateLockoutTimer();
+
+    // Scenario 2: Smart Auto-Biometric Prompt on Launch
+    if (!_isSetupMode &&
+        _canCheckBiometrics &&
+        widget.settingsRepository.isBiometricEnabled &&
+        !widget.settingsRepository.preferPinOverBiometric &&
+        !_isPinLocked &&
+        !_hasAutoPromptedBiometrics) {
+      _hasAutoPromptedBiometrics = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          unawaited(_authenticateWithBiometrics());
+        }
+      });
+    }
   }
 
   Future<void> _savePin(String pin) async {
@@ -216,6 +232,13 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
       _enteredPin.value = '';
       unawaited(HapticFeedback.mediumImpact());
       await widget.securityRepository.recordSuccessfulPin();
+
+      // Remember User Preference:
+      // If user unlocks using PIN when biometrics is available & enabled, save preference
+      if (_canCheckBiometrics && widget.settingsRepository.isBiometricEnabled) {
+        await widget.settingsRepository.setPreferPinOverBiometric(true);
+      }
+
       if (!mounted) return;
       _navigateToHome();
     } else {
@@ -329,7 +352,7 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
       return;
     }
     if (!mounted) return;
-    await const SettingsRepository().setHasCompletedOnboarding(true);
+    await widget.settingsRepository.setHasCompletedOnboarding(true);
     _newPinController.clear();
     _confirmPinController.clear();
     setState(() {
@@ -652,8 +675,7 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
                                                   BoxShadow(
                                                     color: AppColors.highlight
                                                         .withValues(alpha: 0.4),
-                                                    blurRadius: 10,
-                                                    spreadRadius: 1,
+                                                    blurRadius: 7,
                                                   ),
                                                 ]
                                               : null,
@@ -667,7 +689,9 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
                               const SizedBox(height: 36),
 
                               // Biometric option
-                              if (_canCheckBiometrics && !_isPinLocked)
+                              if (_canCheckBiometrics &&
+                                  widget.settingsRepository.isBiometricEnabled &&
+                                  !_isPinLocked)
                                 AnimatedBuilder(
                                   animation: _entryController,
                                   builder: (context, child) {
@@ -747,13 +771,7 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
                                   return Opacity(
                                     opacity: (_entryController.value - 0.3)
                                         .clamp(0.0, 1.0),
-                                    child: Transform.scale(
-                                      scale:
-                                          1 +
-                                          0.05 *
-                                              sin(_entryController.value * pi),
-                                      child: child,
-                                    ),
+                                    child: child,
                                   );
                                 },
                                 child: IgnorePointer(
