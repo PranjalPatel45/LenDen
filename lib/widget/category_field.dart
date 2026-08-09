@@ -69,7 +69,7 @@ class _CategoryFieldState extends State<CategoryField> {
       children: [
         GlassInput(
           controller: _controller,
-          labelText: 'Category (optional)',
+          fieldLabel: 'Category (optional)',
           prefixIcon: const Icon(Icons.category_outlined),
           hintText: 'e.g. Food, Salary, Shopping...',
         ),

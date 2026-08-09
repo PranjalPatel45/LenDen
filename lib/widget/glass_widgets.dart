@@ -104,6 +104,7 @@ class GlassCard extends StatelessWidget {
 
 class GlassInput extends StatelessWidget {
   final TextEditingController? controller;
+  final String? fieldLabel;
   final String? labelText;
   final String? hintText;
   final Widget? prefixIcon;
@@ -118,6 +119,7 @@ class GlassInput extends StatelessWidget {
   const GlassInput({
     super.key,
     this.controller,
+    this.fieldLabel,
     this.labelText,
     this.hintText,
     this.prefixIcon,
@@ -132,7 +134,10 @@ class GlassInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FocusMotion(
+    final effectiveLabel = fieldLabel ?? labelText;
+    final effectiveHint = hintText ?? (fieldLabel != null ? null : labelText);
+
+    final inputWidget = FocusMotion(
       builder: (context, focused, duration) => AnimatedContainer(
         duration: duration,
         curve: Curves.easeOutCubic,
@@ -165,16 +170,18 @@ class GlassInput extends StatelessWidget {
           onTap: onTap,
           onChanged: onChanged,
           inputFormatters: inputFormatters,
-          style: const TextStyle(color: AppColors.black, fontSize: 16),
+          style: const TextStyle(
+            color: AppColors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
           decoration: InputDecoration(
-            labelText: labelText,
-            hintText: hintText,
-            labelStyle: const TextStyle(
-              color: AppColors.primaryText,
-              fontSize: 14,
-            ),
+            hintText: effectiveHint,
+            floatingLabelBehavior: FloatingLabelBehavior.never,
             hintStyle: TextStyle(
-              color: AppColors.black.withValues(alpha: 0.35),
+              color: AppColors.black.withValues(alpha: 0.38),
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
             ),
             prefixIcon: prefixIcon != null
                 ? SizedBox(
@@ -205,6 +212,30 @@ class GlassInput extends StatelessWidget {
         ),
       ),
     );
+
+    if (effectiveLabel != null && effectiveLabel.isNotEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 2, bottom: 6),
+            child: Text(
+              effectiveLabel,
+              style: const TextStyle(
+                color: AppColors.primaryText,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+          inputWidget,
+        ],
+      );
+    }
+
+    return inputWidget;
   }
 }
 

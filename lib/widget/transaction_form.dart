@@ -95,12 +95,13 @@ class TransactionForm extends StatelessWidget {
               const SizedBox(height: 24),
               GlassInput(
                 controller: amountController,
-                labelText: 'Amount ($currencySymbol)',
+                fieldLabel: 'Amount',
+                hintText: '0.00',
                 prefixIcon: Text(
                   currencySymbol,
                   style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.primaryText,
                   ),
                 ),
@@ -115,15 +116,27 @@ class TransactionForm extends StatelessWidget {
               const SizedBox(height: 16),
               GlassInput(
                 controller: titleController,
-                labelText: titleFieldLabel,
+                fieldLabel: titleFieldLabel,
+                hintText: isTitleReadOnly ? '' : 'Enter $titleFieldLabel',
                 readOnly: isTitleReadOnly,
                 prefixIcon: isTitleReadOnly
-                    ? const Icon(Icons.lock_outline_rounded, color: AppColors.grey)
+                    ? const Icon(
+                        Icons.person_outline_rounded,
+                        color: AppColors.highlight,
+                      )
                     : titleFieldPrefixIcon,
+                suffixIcon: isTitleReadOnly
+                    ? const Icon(
+                        Icons.lock_rounded,
+                        size: 18,
+                        color: AppColors.secondaryText,
+                      )
+                    : null,
               ),
               const SizedBox(height: 16),
               ExpenseTypeField(
                 selectedType: selectedType,
+                fieldLabel: 'Transaction Type',
                 types: allowedTypes,
                 itemTextColor: typeItemTextColor,
                 onChanged: onTypeChanged,
@@ -140,14 +153,27 @@ class TransactionForm extends StatelessWidget {
               const SizedBox(height: 16),
               GlassInput(
                 controller: reasonController,
-                labelText: 'Reason (optional)',
-                prefixIcon: const Icon(Icons.notes),
+                fieldLabel: 'Reason (Optional)',
+                hintText: 'Add a note...',
+                prefixIcon: const Icon(
+                  Icons.notes_rounded,
+                  color: AppColors.secondaryText,
+                ),
               ),
               const SizedBox(height: 16),
               GlassInput(
                 controller: dateController,
-                labelText: 'Date',
-                suffixIcon: const Icon(Icons.calendar_today),
+                fieldLabel: 'Date',
+                hintText: 'Select date',
+                prefixIcon: const Icon(
+                  Icons.calendar_month_rounded,
+                  color: AppColors.secondaryText,
+                ),
+                suffixIcon: const Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 18,
+                  color: AppColors.secondaryText,
+                ),
                 readOnly: true,
                 onTap: onDateTap,
               ),
