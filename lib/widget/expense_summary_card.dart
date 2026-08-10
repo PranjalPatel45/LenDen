@@ -73,7 +73,9 @@ class ExpenseSummaryCard extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      formatCurrency(totalBalance.abs(), currencySymbol),
+                      totalBalance < 0
+                          ? '-${formatCurrency(totalBalance.abs(), currencySymbol)}'
+                          : formatCurrency(totalBalance, currencySymbol),
                       style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                         fontSize: 36,
                         color: totalBalance > 0

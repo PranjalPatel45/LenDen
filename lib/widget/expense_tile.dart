@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:to_do/model/expense_model.dart';
+import 'package:to_do/utils/category_helper.dart';
 import 'package:to_do/utils/currency_helper.dart';
 import 'package:to_do/utils/transaction_type.dart';
 import '../utils/app_colors.dart';
@@ -350,6 +351,9 @@ class ExpenseTile extends StatelessWidget {
     final isPositive = TransactionType.isPositive(expense.type);
     final signedAmount =
         '${isPositive ? '+' : '-'}${formatCurrency(expense.amount, currencySymbol)}';
+    final categoryInfo = parseCategoryAndReason(expense.reason);
+    final displayCategory = expense.category ?? categoryInfo.category;
+    final displayNote = categoryInfo.cleanReason;
 
     return Semantics(
       button: true,
@@ -415,28 +419,41 @@ class ExpenseTile extends StatelessWidget {
                               size: 13,
                               color: AppColors.grey,
                             ),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                formatDate(expense.date),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      fontSize: 12,
-                                      color: AppColors.primaryText.withValues(
-                                        alpha: 0.58,
-                                      ),
+                            const SizedBox(width: 5),
+                            Text(
+                              formatDate(expense.date),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    fontSize: 12,
+                                    color: AppColors.primaryText.withValues(
+                                      alpha: 0.58,
                                     ),
-                              ),
+                                  ),
                             ),
+                            if (displayCategory != null && displayCategory.isNotEmpty) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: tileColor.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  displayCategory,
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: _darkColorForType(expense.type),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
-                        if (expense.reason != null &&
-                            expense.reason!.isNotEmpty) ...[
-                          const SizedBox(height: 4),
+                        if (displayNote.isNotEmpty) ...[
+                          const SizedBox(height: 3),
                           Text(
-                            expense.reason!,
+                            displayNote,
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   fontSize: 12,

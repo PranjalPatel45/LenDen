@@ -32,6 +32,9 @@ class ConnectScreen extends StatefulWidget {
 }
 
 class _ConnectScreenState extends State<ConnectScreen> {
+  static List<Contact>? _cachedContacts;
+  static bool? _cachedPermissionGranted;
+
   List<Contact> _contacts = [];
   List<Contact> _filteredContacts = [];
   bool _isLoading = true;
@@ -46,7 +49,16 @@ class _ConnectScreenState extends State<ConnectScreen> {
     _ownsSearchController = widget.searchController == null;
     _searchController = widget.searchController ?? TextEditingController();
     _searchController.addListener(_filterContacts);
-    unawaited(_checkPermissionAndLoad());
+
+    if (_cachedContacts != null) {
+      _contacts = List<Contact>.from(_cachedContacts!);
+      _filteredContacts = _contacts;
+      _isLoading = false;
+      _isPermissionGranted = _cachedPermissionGranted ?? true;
+      unawaited(_checkPermissionAndLoad(silent: true));
+    } else {
+      unawaited(_checkPermissionAndLoad(silent: false));
+    }
   }
 
   @override
@@ -56,22 +68,28 @@ class _ConnectScreenState extends State<ConnectScreen> {
     super.dispose();
   }
 
-  Future<void> _checkPermissionAndLoad() async {
-    setState(() => _isLoading = true);
+  Future<void> _checkPermissionAndLoad({bool silent = false}) async {
+    if (!silent) {
+      setState(() => _isLoading = true);
+    }
     try {
       final deviceContacts = await FlutterContacts.getAll(
         properties: {ContactProperty.phone},
       );
       if (!mounted) return;
       _isPermissionGranted = true;
+      _cachedPermissionGranted = true;
       _combineAndSetContacts(deviceContacts);
     } catch (_) {
       if (!mounted) return;
+      final manual = _getManualContactsAsContacts();
+      _cachedContacts = manual;
+      _cachedPermissionGranted = false;
       setState(() {
         _isPermissionGranted = false;
         _isLoading = false;
-        _contacts = _getManualContactsAsContacts();
-        _filteredContacts = _contacts;
+        _contacts = manual;
+        _filteredContacts = manual;
       });
     }
   }
@@ -155,6 +173,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
     }
 
     combined.sort((a, b) => (a.displayName ?? '').compareTo(b.displayName ?? ''));
+    _cachedContacts = combined;
 
     if (!mounted) return;
     setState(() {
