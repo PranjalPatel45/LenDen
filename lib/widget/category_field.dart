@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 
+import '../data/settings_repository.dart';
 import '../utils/app_colors.dart';
+import '../utils/app_snackbar.dart';
 import 'glass_widgets.dart';
 
 class CategoryField extends StatefulWidget {
   final String? selectedCategory;
   final List<String> categories;
   final ValueChanged<String> onCategorySelected;
+  final SettingsRepository settingsRepository;
 
   const CategoryField({
     super.key,
     this.selectedCategory,
     required this.categories,
     required this.onCategorySelected,
+    this.settingsRepository = const SettingsRepository(),
   });
 
   @override
@@ -54,6 +58,21 @@ class _CategoryFieldState extends State<CategoryField> {
     widget.onCategorySelected(cat);
   }
 
+  Future<void> _createAndSelectCategory(String categoryName) async {
+    final trimmed = categoryName.trim();
+    if (trimmed.isEmpty) return;
+
+    await widget.settingsRepository.saveCategory(trimmed);
+    _selectCategory(trimmed);
+
+    if (mounted) {
+      AppSnackbar.showSuccess(
+        context: context,
+        message: 'Category "$trimmed" created',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final query = _controller.text.trim().toLowerCase();
@@ -91,9 +110,7 @@ class _CategoryFieldState extends State<CategoryField> {
                       fontWeight: FontWeight.w700,
                       fontSize: 12,
                     ),
-                    onPressed: () {
-                      _selectCategory(_controller.text.trim());
-                    },
+                    onPressed: () => _createAndSelectCategory(_controller.text),
                   ),
                 ),
               ...matchingCategories.map((cat) {

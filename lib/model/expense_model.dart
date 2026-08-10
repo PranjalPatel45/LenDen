@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 
+import '../utils/category_helper.dart';
+
 part 'expense_model.g.dart';
 
 @HiveType(typeId: 0)
@@ -34,4 +36,7 @@ class Expense extends HiveObject {
     this.phoneNumber,
     this.reason,
   });
+
+  /// Convenient getter to extract category from stored reason string.
+  String? get category => parseCategoryAndReason(reason).category;
 }

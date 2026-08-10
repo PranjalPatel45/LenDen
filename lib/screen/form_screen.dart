@@ -100,6 +100,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
             selectedCategory: _selectedCategory,
             categories: widget.settingsRepository.categories,
             onCategoryChanged: (cat) => setState(() => _selectedCategory = cat),
+            settingsRepository: widget.settingsRepository,
             onTypeChanged: (value) => setState(() => _selectedType = value),
             onDateTap: () async {
               final pickedDate = await showDatePicker(

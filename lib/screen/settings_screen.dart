@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
+import '../data/expense_repository.dart';
 import '../data/security_repository.dart';
 import '../data/settings_repository.dart';
 import '../utils/app_colors.dart';
@@ -10,8 +11,10 @@ import '../utils/app_snackbar.dart';
 import '../utils/currency_helper.dart';
 import '../utils/app_design.dart';
 import '../utils/app_transitions.dart';
+import '../utils/report_helper.dart';
 import '../widget/glass_widgets.dart';
 import 'lock_screen.dart';
+import 'manage_categories_screen.dart';
 import 'recovery_questions_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -145,6 +148,130 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
     }
+  }
+
+  Future<void> _exportCsv() async {
+    final repository = const ExpenseRepository();
+    final expenses = repository.getAll();
+    if (expenses.isEmpty) {
+      AppSnackbar.showError(
+        context: context,
+        message: 'No transactions to export.',
+      );
+      return;
+    }
+    final csv = ReportHelper.generateCsvReport(expenses);
+    await Clipboard.setData(ClipboardData(text: csv));
+    if (mounted) {
+      AppSnackbar.showSuccess(
+        context: context,
+        message: 'CSV report copied to clipboard!',
+      );
+    }
+  }
+
+  Future<void> _backupJson() async {
+    final repository = const ExpenseRepository();
+    final expenses = repository.getAll();
+    if (expenses.isEmpty) {
+      AppSnackbar.showError(
+        context: context,
+        message: 'No transactions to backup.',
+      );
+      return;
+    }
+    final jsonStr = ReportHelper.generateJsonBackup(expenses);
+    await Clipboard.setData(ClipboardData(text: jsonStr));
+    if (mounted) {
+      AppSnackbar.showSuccess(
+        context: context,
+        message: 'JSON backup copied to clipboard!',
+      );
+    }
+  }
+
+  Future<void> _restoreJson() async {
+    final controller = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Restore Data'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Paste your JSON backup below:'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              maxLines: 6,
+              decoration: const InputDecoration(
+                hintText: '[\n  {\n    "title": ...\n  }\n]',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Restore',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && controller.text.trim().isNotEmpty) {
+      try {
+        final restored = ReportHelper.parseJsonBackup(controller.text.trim());
+        if (restored.isEmpty) {
+          if (mounted) {
+            AppSnackbar.showError(
+              context: context,
+              message: 'Invalid or empty backup.',
+            );
+          }
+          return;
+        }
+        final repository = const ExpenseRepository();
+        for (final expense in restored) {
+          await repository.add(expense);
+        }
+        if (mounted) {
+          AppSnackbar.showSuccess(
+            context: context,
+            message: 'Restored ${restored.length} transactions!',
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          AppSnackbar.showError(
+            context: context,
+            message: 'Failed to parse JSON backup.',
+          );
+        }
+      }
+    }
+  }
+
+  void _navigateToManageCategories() {
+    unawaited(
+      Navigator.push(
+        context,
+        AppTransitions.slideRight(
+          page: ManageCategoriesScreen(
+            settingsRepository: widget.settingsRepository,
+          ),
+        ),
+      ),
+    );
   }
 
   Future<bool> _verifyPinBeforeRemoval() async {
@@ -390,6 +517,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 30),
+          const SectionLabel(label: 'Categories', icon: Icons.category_rounded),
+          const SizedBox(height: 8),
+          GlassCard(
+            radius: 16,
+            child: ListTile(
+              leading: const GlassIcon(
+                icon: Icons.edit_note_rounded,
+                color: AppColors.highlight,
+              ),
+              title: const Text('Manage Categories'),
+              subtitle: Text(
+                '${widget.settingsRepository.categories.length} categories — tap to add, edit, or delete',
+                style: TextStyle(
+                  color: AppColors.primaryText.withValues(alpha: 0.6),
+                  fontSize: 13,
+                ),
+              ),
+              trailing: const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.grey,
+              ),
+              onTap: _navigateToManageCategories,
+            ),
+          ),
+          const SizedBox(height: 30),
           const SectionLabel(label: 'Currency', icon: Icons.payments_rounded),
           const SizedBox(height: 8),
           GlassCard(
@@ -425,6 +577,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: AppColors.grey,
               ),
               onTap: _showCurrencyPicker,
+            ),
+          ),
+          const SizedBox(height: 30),
+          const SectionLabel(label: 'Data & Export', icon: Icons.ios_share_rounded),
+          const SizedBox(height: 8),
+          GlassCard(
+            radius: 16,
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const GlassIcon(
+                    icon: Icons.table_chart_outlined,
+                    color: AppColors.highlight,
+                  ),
+                  title: const Text('Export Report (CSV)'),
+                  subtitle: const Text('Copy CSV statement to clipboard'),
+                  trailing: const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.grey,
+                  ),
+                  onTap: _exportCsv,
+                ),
+                ListTile(
+                  leading: const GlassIcon(
+                    icon: Icons.cloud_upload_outlined,
+                    color: AppColors.lendColorDark,
+                  ),
+                  title: const Text('Backup Data (JSON)'),
+                  subtitle: const Text('Copy database backup to clipboard'),
+                  trailing: const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.grey,
+                  ),
+                  onTap: _backupJson,
+                ),
+                ListTile(
+                  leading: const GlassIcon(
+                    icon: Icons.cloud_download_outlined,
+                    color: AppColors.borrowedColorDark,
+                  ),
+                  title: const Text('Restore Data'),
+                  subtitle: const Text('Import transactions from JSON backup'),
+                  trailing: const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.grey,
+                  ),
+                  onTap: _restoreJson,
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 30),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../data/settings_repository.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_motion.dart';
 import '../utils/transaction_type.dart';
@@ -33,6 +34,7 @@ class TransactionForm extends StatelessWidget {
     this.selectedCategory,
     this.categories = const [],
     this.onCategoryChanged,
+    this.settingsRepository = const SettingsRepository(),
     this.isSubmitting = false,
     this.typeItemTextColor = AppColors.primaryText,
     this.submitColor = AppColors.highlight,
@@ -60,6 +62,7 @@ class TransactionForm extends StatelessWidget {
   final String? selectedCategory;
   final List<String> categories;
   final ValueChanged<String>? onCategoryChanged;
+  final SettingsRepository settingsRepository;
   final bool isSubmitting;
   final Color typeItemTextColor;
   final Color submitColor;
@@ -152,6 +155,7 @@ class TransactionForm extends StatelessWidget {
                   selectedCategory: selectedCategory,
                   categories: categories,
                   onCategorySelected: onCategoryChanged!,
+                  settingsRepository: settingsRepository,
                 ),
               ],
               const SizedBox(height: 16),

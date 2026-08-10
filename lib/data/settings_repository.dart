@@ -81,6 +81,34 @@ class SettingsRepository {
     }
   }
 
+  Future<void> deleteCategory(String categoryName) async {
+    final trimmed = categoryName.trim();
+    if (trimmed.isEmpty) return;
+    final current = categories;
+    current.removeWhere((c) => c.toLowerCase() == trimmed.toLowerCase());
+    await _box.put(_categoriesKey, current);
+  }
+
+  Future<void> editCategory(String oldName, String newName) async {
+    final trimmedOld = oldName.trim();
+    final trimmedNew = newName.trim();
+    if (trimmedOld.isEmpty || trimmedNew.isEmpty) return;
+
+    final current = categories;
+    final index = current.indexWhere(
+      (c) => c.toLowerCase() == trimmedOld.toLowerCase(),
+    );
+
+    if (index != -1) {
+      current[index] = trimmedNew;
+      await _box.put(_categoriesKey, current);
+    }
+  }
+
+  Future<void> resetCategories() async {
+    await _box.put(_categoriesKey, List<String>.from(defaultCategories));
+  }
+
   Future<void> setCurrency(String symbol, String code) async {
     await _box.putAll({_currencySymbolKey: symbol, _currencyCodeKey: code});
   }

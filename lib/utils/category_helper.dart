@@ -8,7 +8,7 @@ class CategoryReasonResult {
   });
 }
 
-/// Parses a stored reason string which may contain a "Category: <name>" prefix.
+/// Parses a stored reason string which may contain a `"Category: <name>"` prefix.
 CategoryReasonResult parseCategoryAndReason(String? rawReason) {
   if (rawReason == null || rawReason.trim().isEmpty) {
     return const CategoryReasonResult(category: null, cleanReason: '');

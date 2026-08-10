@@ -69,6 +69,42 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
     }
   }
 
+  void _settleBalance(double netBalance, String currencySymbol) async {
+    if (netBalance == 0) return;
+
+    final settleType =
+        netBalance > 0 ? TransactionType.borrowed : TransactionType.lent;
+    final settleAmount = netBalance.abs();
+    final now = DateTime.now().toIso8601String().split('T')[0];
+
+    final settlementExpense = Expense(
+      title: widget.contactName,
+      amount: settleAmount,
+      date: now,
+      type: settleType,
+      contactName: widget.contactName,
+      phoneNumber: widget.phoneNumber,
+      reason: 'Settled balance with ${widget.contactName}',
+    );
+
+    try {
+      await widget.expenseRepository.add(settlementExpense);
+      if (mounted) {
+        AppSnackbar.showSuccess(
+          context: context,
+          message: 'Balance settled with ${widget.contactName}',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.showError(
+          context: context,
+          message: 'Failed to settle balance.',
+        );
+      }
+    }
+  }
+
   void _navigateToEditExpense(Expense expense) {
     unawaited(
       Navigator.push(
@@ -173,16 +209,19 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                             children: [
                               Row(
                                 children: [
-                                  CircleAvatar(
-                                    backgroundColor: AppColors.highlight
-                                        .withValues(alpha: 0.12),
-                                    child: Text(
-                                      widget.contactName.isNotEmpty
-                                          ? widget.contactName[0].toUpperCase()
-                                          : '?',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.highlight,
+                                  Hero(
+                                    tag: 'contact-avatar-${widget.contactName}',
+                                    child: CircleAvatar(
+                                      backgroundColor: AppColors.highlight
+                                          .withValues(alpha: 0.12),
+                                      child: Text(
+                                        widget.contactName.isNotEmpty
+                                            ? widget.contactName[0].toUpperCase()
+                                            : '?',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.highlight,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -212,6 +251,36 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                                       ],
                                     ),
                                   ),
+                                  if (netBalance != 0)
+                                    TextButton.icon(
+                                      onPressed: () => _settleBalance(
+                                        netBalance,
+                                        currencySymbol,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.check_circle_outline_rounded,
+                                        size: 16,
+                                      ),
+                                      label: const Text(
+                                        'Settle',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: AppColors.highlight,
+                                        backgroundColor: AppColors.highlight
+                                            .withValues(alpha: 0.1),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 6,
+                                        ),
+                                        minimumSize: Size.zero,
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                    ),
                                 ],
                               ),
                               const SizedBox(height: 16),

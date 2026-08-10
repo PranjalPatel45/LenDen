@@ -44,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final Set<dynamic> _restoredExpenseKeys = <dynamic>{};
   int _selectedIndex = 0;
   String _selectedPeriod = allExpensePeriods;
+  String _selectedCategoryFilter = 'All';
   DateTime? _lastBackPressTime;
 
   @override
@@ -196,6 +197,45 @@ class _HomeScreenState extends State<HomeScreen> {
           final double netLending = totalLent - totalBorrowed;
           final currencySymbol = widget.settingsRepository.currencySymbol;
 
+          // Calculate category frequencies from the current period's expenses
+          final Map<String, int> categoryCounts = {};
+          for (final expense in filteredExpenses) {
+            final cat = expense.category;
+            if (cat != null && cat.trim().isNotEmpty) {
+              final key = categoryCounts.keys.firstWhere(
+                (k) => k.toLowerCase() == cat.trim().toLowerCase(),
+                orElse: () => cat.trim(),
+              );
+              categoryCounts[key] = (categoryCounts[key] ?? 0) + 1;
+            }
+          }
+
+          // Sort categories by entry count descending (most used first)
+          final sortedUsedCategories = categoryCounts.keys.toList()
+            ..sort((a, b) {
+              final countA = categoryCounts[a] ?? 0;
+              final countB = categoryCounts[b] ?? 0;
+              final cmp = countB.compareTo(countA);
+              if (cmp != 0) return cmp;
+              return a.compareTo(b);
+            });
+
+          // 'All' is ALWAYS first, followed only by categories with entries
+          final availableCategories = ['All', ...sortedUsedCategories];
+
+          List<Expense> displayedExpenses = filteredExpenses;
+          if (_selectedCategoryFilter != 'All') {
+            final match = availableCategories.any(
+              (c) => c.toLowerCase() == _selectedCategoryFilter.toLowerCase(),
+            );
+            if (match) {
+              displayedExpenses = filteredExpenses.where((e) {
+                final cat = e.category ?? '';
+                return cat.toLowerCase() == _selectedCategoryFilter.toLowerCase();
+              }).toList();
+            }
+          }
+
           return ResponsiveContent(
             maxWidth: 760,
             child: CustomScrollView(
@@ -212,7 +252,38 @@ class _HomeScreenState extends State<HomeScreen> {
                     periodLabel: expensePeriodLabel(_selectedPeriod),
                   ),
                 ),
-                if (filteredExpenses.isEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    child: SizedBox(
+                      height: 38,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: availableCategories.map((cat) {
+                          final isSelected = cat.toLowerCase() == _selectedCategoryFilter.toLowerCase();
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: FilterChip(
+                              label: Text(cat),
+                              selected: isSelected,
+                              selectedColor: AppColors.highlight.withValues(alpha: 0.2),
+                              checkmarkColor: AppColors.highlight,
+                              labelStyle: TextStyle(
+                                fontSize: 12,
+                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                color: isSelected ? AppColors.highlight : AppColors.primaryText,
+                              ),
+                              onSelected: (_) {
+                                setState(() => _selectedCategoryFilter = cat);
+                              },
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                ),
+                if (displayedExpenses.isEmpty)
                   SliverFillRemaining(
                     hasScrollBody: false,
                     child: Center(
@@ -248,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 else
                   SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
-                      final expense = filteredExpenses[index];
+                      final expense = displayedExpenses[index];
                       final swipeTile = TransactionSwipeTile(
                         key: ValueKey('swipe-expense-${expense.key}'),
                         expense: expense,
@@ -256,9 +327,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () => _onExpenseTileTap(expense),
                         onEdit: () => _navigateToEditExpense(expense),
                         onDelete: () => deleteExpenseWithUndo(
-                          // The list item context can unmount as soon as Hive
-                          // removes this row. Use the screen context so the
-                          // post-delete Undo SnackBar can still be displayed.
                           context: this.context,
                           expense: expense,
                           expenseRepository: widget.expenseRepository,
@@ -277,7 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         order: index,
                         child: swipeTile,
                       );
-                    }, childCount: filteredExpenses.length),
+                    }, childCount: displayedExpenses.length),
                   ),
                 // Add bottom padding to account for FAB and bottom nav bar
                 SliverToBoxAdapter(
