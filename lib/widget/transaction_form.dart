@@ -29,6 +29,7 @@ class TransactionForm extends StatelessWidget {
     this.titleFieldLabel = 'Title',
     this.titleFieldPrefixIcon,
     this.isTitleReadOnly = false,
+    this.showTitleField = true,
     this.selectedCategory,
     this.categories = const [],
     this.onCategoryChanged,
@@ -55,6 +56,7 @@ class TransactionForm extends StatelessWidget {
   final String titleFieldLabel;
   final Widget? titleFieldPrefixIcon;
   final bool isTitleReadOnly;
+  final bool showTitleField;
   final String? selectedCategory;
   final List<String> categories;
   final ValueChanged<String>? onCategoryChanged;
@@ -113,26 +115,28 @@ class TransactionForm extends StatelessWidget {
                   LengthLimitingTextInputFormatter(12),
                 ],
               ),
-              const SizedBox(height: 16),
-              GlassInput(
-                controller: titleController,
-                fieldLabel: titleFieldLabel,
-                hintText: isTitleReadOnly ? '' : 'Enter $titleFieldLabel',
-                readOnly: isTitleReadOnly,
-                prefixIcon: isTitleReadOnly
-                    ? const Icon(
-                        Icons.person_outline_rounded,
-                        color: AppColors.highlight,
-                      )
-                    : titleFieldPrefixIcon,
-                suffixIcon: isTitleReadOnly
-                    ? const Icon(
-                        Icons.lock_rounded,
-                        size: 18,
-                        color: AppColors.secondaryText,
-                      )
-                    : null,
-              ),
+              if (showTitleField) ...[
+                const SizedBox(height: 16),
+                GlassInput(
+                  controller: titleController,
+                  fieldLabel: titleFieldLabel,
+                  hintText: isTitleReadOnly ? '' : 'Enter $titleFieldLabel',
+                  readOnly: isTitleReadOnly,
+                  prefixIcon: isTitleReadOnly
+                      ? const Icon(
+                          Icons.person_outline_rounded,
+                          color: AppColors.highlight,
+                        )
+                      : titleFieldPrefixIcon,
+                  suffixIcon: isTitleReadOnly
+                      ? const Icon(
+                          Icons.lock_rounded,
+                          size: 18,
+                          color: AppColors.secondaryText,
+                        )
+                      : null,
+                ),
+              ],
               const SizedBox(height: 16),
               ExpenseTypeField(
                 selectedType: selectedType,

@@ -6,6 +6,7 @@ import '../model/expense_model.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_snackbar.dart';
 import '../utils/app_design.dart';
+import '../utils/category_helper.dart';
 import '../utils/expense_validation.dart';
 import '../utils/transaction_type.dart';
 import '../widget/transaction_form.dart';
@@ -32,6 +33,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
   late final TextEditingController dateController;
   late final TextEditingController reasonController;
   late String? _selectedType;
+  String? _selectedCategory;
   String _currencySymbol = '\$';
   bool _isSaving = false;
 
@@ -63,7 +65,11 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
       text: widget.expense.amount.toString(),
     );
     dateController = TextEditingController(text: widget.expense.date);
-    reasonController = TextEditingController(text: widget.expense.reason ?? '');
+
+    final categoryReason = parseCategoryAndReason(widget.expense.reason);
+    _selectedCategory = categoryReason.category;
+    reasonController = TextEditingController(text: categoryReason.cleanReason);
+
     _selectedType = widget.expense.type;
     _loadCurrencySymbol();
   }
@@ -99,12 +105,16 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
             currencySymbol: _currencySymbol,
             typeItemTextColor: AppColors.primaryText,
             titleFieldLabel: _isContactTransaction
-                ? 'Contact Person (Locked)'
+                ? 'Contact Name (Locked)'
                 : 'Title',
             isTitleReadOnly: _isContactTransaction,
+            showTitleField: _isContactTransaction,
             titleFieldPrefixIcon: _isContactTransaction
                 ? const Icon(Icons.person_outline_rounded, color: AppColors.grey)
                 : null,
+            selectedCategory: _selectedCategory,
+            categories: widget.settingsRepository.categories,
+            onCategoryChanged: (cat) => setState(() => _selectedCategory = cat),
             onTypeChanged: (value) => setState(() => _selectedType = value),
             onDateTap: () async {
               final pickedDate = await showDatePicker(
@@ -122,8 +132,15 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
             },
             onCancel: () => Navigator.pop(context),
             onSubmit: () async {
+              final computedTitle = _isContactTransaction
+                  ? titleController.text
+                  : (_selectedCategory != null &&
+                          _selectedCategory!.trim().isNotEmpty
+                      ? _selectedCategory!.trim()
+                      : (_selectedType ?? 'Transaction'));
+
               final validation = validateExpenseInput(
-                title: titleController.text,
+                title: computedTitle,
                 amountText: amountController.text,
                 date: dateController.text,
                 type: _selectedType,
@@ -151,14 +168,23 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                 if (_isContactTransaction) {
                   widget.expense.contactName = previousContactName;
                 } else {
-                  widget.expense.title = titleController.text;
+                  widget.expense.title = computedTitle;
                 }
                 widget.expense.amount = amount;
                 widget.expense.date = dateController.text;
                 widget.expense.type = _selectedType!;
-                widget.expense.reason = reasonController.text.isNotEmpty
-                    ? reasonController.text
-                    : null;
+
+                if (_selectedCategory != null &&
+                    _selectedCategory!.trim().isNotEmpty) {
+                  await widget.settingsRepository.saveCategory(
+                    _selectedCategory!,
+                  );
+                }
+
+                widget.expense.reason = formatCategoryAndReason(
+                  category: _selectedCategory,
+                  reason: reasonController.text,
+                );
 
                 await widget.expenseRepository.save(widget.expense);
 
@@ -193,3 +219,4 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     );
   }
 }
+

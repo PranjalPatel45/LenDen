@@ -4,6 +4,7 @@ import 'package:to_do/data/settings_repository.dart';
 import 'package:to_do/model/expense_model.dart';
 import 'package:to_do/utils/app_snackbar.dart';
 import 'package:to_do/utils/app_design.dart';
+import 'package:to_do/utils/category_helper.dart';
 import 'package:to_do/utils/expense_validation.dart';
 import 'package:to_do/utils/transaction_type.dart';
 import 'package:to_do/widget/transaction_form.dart';
@@ -95,6 +96,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                 ? const Icon(Icons.lock_outline_rounded)
                 : null,
             isTitleReadOnly: widget.prefillContactName != null,
+            showTitleField: widget.prefillContactName != null,
             selectedCategory: _selectedCategory,
             categories: widget.settingsRepository.categories,
             onCategoryChanged: (cat) => setState(() => _selectedCategory = cat),
@@ -118,8 +120,13 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
               if (_isSubmitting) return;
               setState(() => _isSubmitting = true);
               try {
+                final computedTitle = widget.prefillContactName ??
+                    (_selectedCategory != null && _selectedCategory!.trim().isNotEmpty
+                        ? _selectedCategory!.trim()
+                        : (_selectedType ?? 'Transaction'));
+
                 final validation = validateExpenseInput(
-                  title: titleController.text,
+                  title: computedTitle,
                   amountText: amountController.text,
                   date: dateController.text,
                   type: _selectedType,
@@ -138,20 +145,19 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                   await widget.settingsRepository.saveCategory(_selectedCategory!);
                 }
 
-                final reasonText = [
-                  if (_selectedCategory != null && _selectedCategory!.trim().isNotEmpty)
-                    'Category: ${_selectedCategory!.trim()}',
-                  if (reasonController.text.isNotEmpty) reasonController.text,
-                ].join(' | ');
+                final reasonText = formatCategoryAndReason(
+                  category: _selectedCategory,
+                  reason: reasonController.text,
+                );
 
                 final newExpense = Expense(
-                  title: titleController.text,
+                  title: computedTitle,
                   amount: amount,
                   date: dateController.text,
                   type: _selectedType!,
                   contactName: widget.prefillContactName,
                   phoneNumber: widget.prefillPhoneNumber,
-                  reason: reasonText.isNotEmpty ? reasonText : null,
+                  reason: reasonText,
                 );
 
                 if (context.mounted) {
