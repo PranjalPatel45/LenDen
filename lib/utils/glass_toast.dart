@@ -52,19 +52,6 @@ class GlassToast {
     final overlay = Overlay.of(context, rootOverlay: true);
     overlay.insert(entry);
   }
-
-  /// Hides the currently visible toast if any.
-  static void hide(BuildContext context) {
-    _OverlayGlassToastState? state;
-    context.visitAncestorElements((element) {
-      if (element is StatefulElement && element.state is _OverlayGlassToastState) {
-        state = element.state as _OverlayGlassToastState;
-        return false;
-      }
-      return true;
-    });
-    state?._dismiss();
-  }
 }
 
 /// The actual toast widget rendered in the overlay.

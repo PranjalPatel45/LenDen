@@ -947,7 +947,6 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
   Widget _modernPinField({
     required TextEditingController controller,
     required String label,
-    ValueChanged<String>? onChanged,
   }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
@@ -967,7 +966,6 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
               LengthLimitingTextInputFormatter(4),
             ],
             obscureText: true,
-            onChanged: onChanged,
             style: const TextStyle(color: AppColors.black, fontSize: 18),
             decoration: InputDecoration(
               labelText: label,

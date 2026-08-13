@@ -82,20 +82,6 @@ class AppSnackbar {
     );
   }
 
-  /// Hides the currently visible snackbar overlay.
-  static void hide(BuildContext context) {
-    _OverlaySnackbarState? state;
-    context.visitAncestorElements((element) {
-      if (element is StatefulElement &&
-          element.state is _OverlaySnackbarState) {
-        state = element.state as _OverlaySnackbarState;
-        return false;
-      }
-      return true;
-    });
-    state?._dismiss();
-  }
-
   /// Tracks the current active overlay entry so we can remove it before
   /// showing a new one.
   static OverlayEntry? _currentEntry;

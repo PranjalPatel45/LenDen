@@ -105,7 +105,6 @@ class GlassCard extends StatelessWidget {
 class GlassInput extends StatelessWidget {
   final TextEditingController? controller;
   final String? fieldLabel;
-  final String? labelText;
   final String? hintText;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
@@ -120,7 +119,6 @@ class GlassInput extends StatelessWidget {
     super.key,
     this.controller,
     this.fieldLabel,
-    this.labelText,
     this.hintText,
     this.prefixIcon,
     this.suffixIcon,
@@ -134,8 +132,8 @@ class GlassInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveLabel = fieldLabel ?? labelText;
-    final effectiveHint = hintText ?? (fieldLabel != null ? null : labelText);
+    final effectiveLabel = fieldLabel;
+    final effectiveHint = hintText;
 
     final inputWidget = FocusMotion(
       builder: (context, focused, duration) => AnimatedContainer(

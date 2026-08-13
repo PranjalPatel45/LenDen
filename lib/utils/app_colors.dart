@@ -232,11 +232,7 @@ class AppColors {
   );
 
   // ---- Liquid Glass derived surfaces ----
-  static const double _glassAlpha = 0.20;
   static const double _glassBorderAlpha = 0.35;
-
-  // Off-white frosted glass base
-  static final Color glassLight = background.withValues(alpha: _glassAlpha);
 
   // Subtle border color (derived from existing palette)
   static final Color glassBorder = primary.withValues(alpha: _glassBorderAlpha);
@@ -256,15 +252,6 @@ class AppColors {
       white.withValues(alpha: 0.35),
       white.withValues(alpha: 0.10),
       background.withValues(alpha: 0.04),
-    ],
-  );
-
-  static final Gradient glassHighlight = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      highlight.withValues(alpha: 0.18),
-      highlight.withValues(alpha: 0.04),
     ],
   );
 }
