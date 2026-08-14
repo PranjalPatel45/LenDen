@@ -52,8 +52,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
           controller: editController,
           autofocus: true,
           decoration: const InputDecoration(
-            labelText: 'Category Name',
-            hintText: 'Enter new category name',
+            hintText: 'Enter category name',
           ),
         ),
         actions: [

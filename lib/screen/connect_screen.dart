@@ -215,13 +215,13 @@ class _ConnectScreenState extends State<ConnectScreen> {
               controller: nameController,
               autofocus: true,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Contact Name'),
+              decoration: const InputDecoration(hintText: 'Contact Name'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: phoneController,
               decoration: const InputDecoration(
-                labelText: 'Phone Number (optional)',
+                hintText: 'Phone Number (optional)',
               ),
               keyboardType: TextInputType.phone,
             ),
@@ -357,12 +357,16 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 2),
-                                  Text(
-                                    formatCurrency(totalLent, currencySymbol),
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.lendColorDark,
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      formatCurrency(totalLent, currencySymbol),
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.lendColorDark,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -387,12 +391,16 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 2),
-                                    Text(
-                                      formatCurrency(totalBorrowed, currencySymbol),
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.borrowedColorDark,
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        formatCurrency(totalBorrowed, currencySymbol),
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.borrowedColorDark,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -419,14 +427,18 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                 ),
                               ),
                               const Spacer(),
-                              Text(
-                                '${netLending >= 0 ? '+' : '-'}${formatCurrency(netLending.abs(), currencySymbol)}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                  color: netLending >= 0
-                                      ? AppColors.lendColorDark
-                                      : AppColors.borrowedColorDark,
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerRight,
+                                child: Text(
+                                  '${netLending >= 0 ? '+' : '-'}${formatCurrency(netLending.abs(), currencySymbol)}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    color: netLending >= 0
+                                        ? AppColors.lendColorDark
+                                        : AppColors.borrowedColorDark,
+                                  ),
                                 ),
                               ),
                             ],

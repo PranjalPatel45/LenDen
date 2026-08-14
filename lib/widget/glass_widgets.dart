@@ -243,6 +243,7 @@ class GlassButton extends StatelessWidget {
   final double radius;
   final Color? color;
   final Color? foregroundColor;
+  final bool isLoading;
 
   const GlassButton({
     super.key,
@@ -251,16 +252,19 @@ class GlassButton extends StatelessWidget {
     this.radius = 16,
     this.color,
     this.foregroundColor,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveOnPressed = isLoading ? null : onPressed;
+
     return PressScale(
-      enabled: onPressed != null,
+      enabled: effectiveOnPressed != null,
       pressedScale: 0.975,
       child: Semantics(
         button: true,
-        enabled: onPressed != null,
+        enabled: effectiveOnPressed != null,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(radius),
           child: BackdropFilter(
@@ -268,7 +272,7 @@ class GlassButton extends StatelessWidget {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: onPressed,
+                onTap: effectiveOnPressed,
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 48),
                   padding: const EdgeInsets.symmetric(
@@ -298,7 +302,20 @@ class GlassButton extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                     textAlign: TextAlign.center,
-                    child: child,
+                    child: isLoading
+                        ? SizedBox(
+                            height: 20,
+                            child: Center(
+                              child: SizedBox.square(
+                                dimension: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: foregroundColor ?? AppColors.white,
+                                ),
+                              ),
+                            ),
+                          )
+                        : child,
                   ),
                 ),
               ),

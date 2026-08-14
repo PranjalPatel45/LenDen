@@ -37,7 +37,11 @@ class _RecoveryQuestionsScreenState extends State<RecoveryQuestionsScreen> {
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_firstAnswerController.text.trim().length < 2 ||
+        _secondAnswerController.text.trim().length < 2) {
+      _showError('Enter answers with at least 2 characters.');
+      return;
+    }
     if (_firstQuestion == _secondQuestion) {
       _showError('Choose two different recovery questions.');
       return;
@@ -75,13 +79,6 @@ class _RecoveryQuestionsScreenState extends State<RecoveryQuestionsScreen> {
       context: context,
       message: message,
     );
-  }
-
-  String? _validateAnswer(String? value) {
-    if (value == null || value.trim().length < 2) {
-      return 'Enter an answer with at least 2 characters.';
-    }
-    return null;
   }
 
   @override
@@ -145,13 +142,10 @@ class _RecoveryQuestionsScreenState extends State<RecoveryQuestionsScreen> {
                           },
                         ),
                         const SizedBox(height: 12),
-                        TextFormField(
+                        GlassInput(
                           controller: _firstAnswerController,
-                          textInputAction: TextInputAction.next,
-                          validator: _validateAnswer,
-                          decoration: const InputDecoration(
-                            labelText: 'First answer',
-                          ),
+                          fieldLabel: 'First answer',
+                          hintText: 'Enter answer...',
                         ),
                         const SizedBox(height: 20),
                         DropdownButtonFormField<String>(
@@ -178,14 +172,10 @@ class _RecoveryQuestionsScreenState extends State<RecoveryQuestionsScreen> {
                           },
                         ),
                         const SizedBox(height: 12),
-                        TextFormField(
+                        GlassInput(
                           controller: _secondAnswerController,
-                          textInputAction: TextInputAction.done,
-                          validator: _validateAnswer,
-                          onFieldSubmitted: (_) => _save(),
-                          decoration: const InputDecoration(
-                            labelText: 'Second answer',
-                          ),
+                          fieldLabel: 'Second answer',
+                          hintText: 'Enter answer...',
                         ),
                         const SizedBox(height: 28),
                         GlassButton(

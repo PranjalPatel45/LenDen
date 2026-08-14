@@ -249,28 +249,25 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 24),
-          TextFormField(
+          GlassInput(
             controller: _firstAnswerController,
+            fieldLabel: setup.questionOne,
+            hintText: 'Enter answer...',
             obscureText: _hideAnswers,
-            enabled: !_isLocked && !_isBusy,
-            textInputAction: TextInputAction.next,
-            decoration: InputDecoration(labelText: setup.questionOne),
+            readOnly: _isLocked || _isBusy,
           ),
           const SizedBox(height: 16),
-          TextFormField(
+          GlassInput(
             controller: _secondAnswerController,
+            fieldLabel: setup.questionTwo,
+            hintText: 'Enter answer...',
             obscureText: _hideAnswers,
-            enabled: !_isLocked && !_isBusy,
-            textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) => _verifyAnswers(),
-            decoration: InputDecoration(
-              labelText: setup.questionTwo,
-              suffixIcon: IconButton(
-                tooltip: _hideAnswers ? 'Show answers' : 'Hide answers',
-                onPressed: () => setState(() => _hideAnswers = !_hideAnswers),
-                icon: Icon(
-                  _hideAnswers ? Icons.visibility_outlined : Icons.visibility_off,
-                ),
+            readOnly: _isLocked || _isBusy,
+            suffixIcon: IconButton(
+              tooltip: _hideAnswers ? 'Show answers' : 'Hide answers',
+              onPressed: () => setState(() => _hideAnswers = !_hideAnswers),
+              icon: Icon(
+                _hideAnswers ? Icons.visibility_outlined : Icons.visibility_off,
               ),
             ),
           ),
@@ -344,15 +341,16 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
   }
 
   Widget _pinField(TextEditingController controller, String label) {
-    return TextField(
+    return GlassInput(
       controller: controller,
+      fieldLabel: label,
+      hintText: '• • • •',
       keyboardType: TextInputType.number,
       obscureText: true,
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(4),
       ],
-      decoration: InputDecoration(labelText: label),
     );
   }
 }

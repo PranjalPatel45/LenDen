@@ -331,7 +331,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                           onSubmitted: (_) => unawaited(verify()),
                           decoration: InputDecoration(
-                            labelText: 'Current 4-digit PIN',
+                            hintText: 'Current 4-digit PIN',
                             errorText: errorText,
                             counterText: '',
                           ),

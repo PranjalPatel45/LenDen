@@ -97,8 +97,12 @@ class AppSnackbar {
     VoidCallback? onAction,
   }) {
     // Remove any existing overlay snackbar first
-    _currentEntry?.remove();
-    _currentEntry = null;
+    if (_currentEntry != null) {
+      try {
+        _currentEntry!.remove();
+      } catch (_) {}
+      _currentEntry = null;
+    }
 
     OverlayEntry? entry;
     entry = OverlayEntry(
@@ -109,8 +113,12 @@ class AppSnackbar {
         actionLabel: actionLabel,
         onAction: onAction,
         onDismissed: () {
-          entry?.remove();
-          _currentEntry = null;
+          try {
+            entry?.remove();
+          } catch (_) {}
+          if (_currentEntry == entry) {
+            _currentEntry = null;
+          }
         },
       ),
     );

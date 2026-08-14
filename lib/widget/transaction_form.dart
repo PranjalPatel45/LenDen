@@ -201,6 +201,7 @@ class TransactionForm extends StatelessWidget {
                   Expanded(
                     child: GlassButton(
                       onPressed: isSubmitting ? null : onSubmit,
+                      isLoading: isSubmitting,
                       radius: 14,
                       color: submitColor,
                       foregroundColor: submitForegroundColor,

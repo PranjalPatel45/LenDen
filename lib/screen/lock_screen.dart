@@ -32,7 +32,7 @@ class LockScreen extends StatefulWidget {
   State<LockScreen> createState() => _LockScreenState();
 }
 
-class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
+class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin, WidgetsBindingObserver {
   final _newPinController = TextEditingController();
   final _confirmPinController = TextEditingController();
   final _localAuth = LocalAuthentication();
@@ -60,10 +60,25 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _setupEntryAnimations();
     _setupShakeAnimation();
     unawaited(_checkSetupAndBiometrics());
     unawaited(_entryController.forward());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (!_isSetupMode &&
+          _canCheckBiometrics &&
+          widget.settingsRepository.isBiometricEnabled &&
+          !widget.settingsRepository.preferPinOverBiometric &&
+          !_isPinLocked) {
+        _hasAutoPromptedBiometrics = true;
+        unawaited(_authenticateWithBiometrics());
+      }
+    }
   }
 
   void _setupEntryAnimations() {
@@ -104,6 +119,7 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _entryController.dispose();
     _shakeController.dispose();
     _enteredPin.dispose();
@@ -948,45 +964,61 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin {
     required TextEditingController controller,
     required String label,
   }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.glassInputFill,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.glassBorder, width: 1),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 2, bottom: 6),
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.primaryText,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.2,
+            ),
           ),
-          child: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(4),
-            ],
-            obscureText: true,
-            style: const TextStyle(color: AppColors.black, fontSize: 18),
-            decoration: InputDecoration(
-              labelText: label,
-              labelStyle: TextStyle(
-                color: AppColors.black.withValues(alpha: 0.7),
+        ),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.glassInputFill,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.glassBorder, width: 1),
               ),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              disabledBorder: InputBorder.none,
-              errorBorder: InputBorder.none,
-              focusedErrorBorder: InputBorder.none,
-              filled: false,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
+              child: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
+                ],
+                obscureText: true,
+                style: const TextStyle(color: AppColors.black, fontSize: 18),
+                decoration: const InputDecoration(
+                  hintText: '• • • •',
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  filled: false,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                ),
               ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 

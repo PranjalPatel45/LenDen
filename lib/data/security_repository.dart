@@ -31,10 +31,20 @@ class SecurityRepository {
   final FlutterSecureStorage _storage;
 
   Future<List<int>> getOrCreateHiveEncryptionKey() async {
-    var storedKey = await _storage.read(key: _hiveEncryptionKey);
+    String? storedKey;
+    try {
+      storedKey = await _storage.read(key: _hiveEncryptionKey);
+    } catch (_) {
+      try {
+        await _storage.delete(key: _hiveEncryptionKey);
+      } catch (_) {}
+    }
+
     if (storedKey == null) {
       storedKey = base64Url.encode(Hive.generateSecureKey());
-      await _storage.write(key: _hiveEncryptionKey, value: storedKey);
+      try {
+        await _storage.write(key: _hiveEncryptionKey, value: storedKey);
+      } catch (_) {}
     }
 
     final decoded = base64Url.decode(storedKey);
@@ -64,28 +74,39 @@ class SecurityRepository {
       hash: _hashPin(pin, salt),
     );
     await _writePinCredential(credential);
-    await _storage.delete(key: _pinAttemptStateKey);
+    try {
+      await _storage.delete(key: _pinAttemptStateKey);
+    } catch (_) {}
   }
 
   Future<void> removePin() async {
-    await _storage.delete(key: _appPinKey);
+    try {
+      await _storage.delete(key: _appPinKey);
+    } catch (_) {}
     if (Hive.isBoxOpen(_settingsBoxName)) {
       final box = Hive.box<dynamic>(_settingsBoxName);
       await box.delete(_pinBackupKey);
       await box.delete('is_biometric_enabled');
       await box.delete('prefer_pin_over_biometric');
     }
-    await _storage.delete(key: _pinAttemptStateKey);
-    await _storage.delete(key: _recoveryQuestionsKey);
-    await _storage.delete(key: _recoveryAttemptStateKey);
+    try {
+      await _storage.delete(key: _pinAttemptStateKey);
+      await _storage.delete(key: _recoveryQuestionsKey);
+      await _storage.delete(key: _recoveryAttemptStateKey);
+    } catch (_) {}
   }
 
   Future<_PinCredential?> _readPinCredential() async {
-    var stored = await _storage.read(key: _appPinKey);
+    String? stored;
+    try {
+      stored = await _storage.read(key: _appPinKey);
+    } catch (_) {}
     if (stored == null) {
       stored = _readPinBackup();
       if (stored != null) {
-        await _storage.write(key: _appPinKey, value: stored);
+        try {
+          await _storage.write(key: _appPinKey, value: stored);
+        } catch (_) {}
       }
     } else {
       await _writePinBackup(stored);
