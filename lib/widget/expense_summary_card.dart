@@ -38,15 +38,15 @@ class ExpenseSummaryCard extends StatelessWidget {
         child: Container(
           margin: const EdgeInsets.fromLTRB(16, 14, 16, 10),
           child: GlassCard(
-          radius: 20,
-          padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
-          child: Column(
+            radius: 24,
+            padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     const Icon(
-                      Icons.account_balance_wallet_outlined,
+                      Icons.account_balance_wallet_rounded,
                       size: 18,
                       color: AppColors.highlight,
                     ),
@@ -56,16 +56,17 @@ class ExpenseSummaryCard extends StatelessWidget {
                         heading,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppColors.primaryText.withValues(alpha: 0.64),
+                        style: const TextStyle(
+                          fontSize: 11.5,
                           fontWeight: FontWeight.w700,
+                          color: AppColors.secondaryText,
                           letterSpacing: 0.5,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 Semantics(
                   label: '$periodLabel balance',
                   value: formatCurrency(totalBalance, currencySymbol),
@@ -77,45 +78,18 @@ class ExpenseSummaryCard extends StatelessWidget {
                           ? '-${formatCurrency(totalBalance.abs(), currencySymbol)}'
                           : formatCurrency(totalBalance, currencySymbol),
                       style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        fontSize: 36,
+                        fontSize: 38,
+                        fontWeight: FontWeight.w800,
                         color: totalBalance > 0
                             ? AppColors.lendColorDark
                             : totalBalance < 0
                             ? AppColors.borrowColorDark
-                            : AppColors.grey,
+                            : AppColors.primaryText,
                       ),
                     ),
                   ),
                 ),
-                if (totalBalance < 0)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      'Your outflow is higher than your inflow',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.borrowColorDark.withValues(alpha: 0.7),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                if (totalBalance > 0)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      'Income and borrowed cash minus expenses and lent money',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.lendColorDark.withValues(alpha: 0.7),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 22),
+                const SizedBox(height: 18),
                 Divider(color: AppColors.primaryText.withValues(alpha: 0.08)),
                 const SizedBox(height: 16),
                 Column(
@@ -129,16 +103,18 @@ class ExpenseSummaryCard extends StatelessWidget {
                             'Income',
                             totalIncome,
                             AppColors.lendColorDark,
+                            AppColors.lendColorLight,
                             Icons.trending_up_rounded,
                           ),
                         ),
-                        const SizedBox(width: 14),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: _buildSummaryItem(
                             context,
                             'Expense',
                             totalExpense,
                             AppColors.borrowColorDark,
+                            AppColors.borrowColorLight,
                             Icons.trending_down_rounded,
                           ),
                         ),
@@ -154,16 +130,18 @@ class ExpenseSummaryCard extends StatelessWidget {
                             'Lent',
                             totalLent,
                             AppColors.highlight,
+                            AppColors.highlight.withValues(alpha: 0.10),
                             Icons.north_east_rounded,
                           ),
                         ),
-                        const SizedBox(width: 14),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: _buildSummaryItem(
                             context,
                             'Borrowed',
                             totalBorrowed,
-                            AppColors.borrowedColor,
+                            AppColors.borrowedColorDark,
+                            AppColors.borrowedColorLight,
                             Icons.south_west_rounded,
                           ),
                         ),
@@ -171,32 +149,36 @@ class ExpenseSummaryCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
+                    horizontal: 14,
+                    vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.44),
-                    borderRadius: BorderRadius.circular(14),
+                    color: AppColors.white.withValues(alpha: 0.65),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppColors.glassCardBorder),
                   ),
                   child: Row(
                     children: [
                       const Icon(
-                        Icons.people_alt_outlined,
-                        size: 17,
+                        Icons.people_alt_rounded,
+                        size: 18,
                         color: AppColors.highlight,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'Net lending',
+                          'Net Lending Ledger',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.labelLarge,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primaryText,
+                          ),
                         ),
                       ),
                       Flexible(
@@ -205,9 +187,10 @@ class ExpenseSummaryCard extends StatelessWidget {
                           alignment: AlignmentDirectional.centerEnd,
                           child: Text(
                             formatCurrency(netLending.abs(), currencySymbol),
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            style: TextStyle(
+                              fontSize: 14,
                               color: netLending >= 0
-                                  ? AppColors.highlight
+                                  ? AppColors.lendColorDark
                                   : AppColors.borrowedColorDark,
                               fontWeight: FontWeight.w800,
                             ),
@@ -230,10 +213,15 @@ class ExpenseSummaryCard extends StatelessWidget {
     String title,
     double amount,
     Color color,
+    Color bgTint,
     IconData icon,
   ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: bgTint,
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -246,23 +234,25 @@ class ExpenseSummaryCard extends StatelessWidget {
                   title.toUpperCase(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  style: TextStyle(
                     fontSize: 10.5,
-                    color: AppColors.primaryText.withValues(alpha: 0.62),
-                    letterSpacing: 0.45,
+                    fontWeight: FontWeight.w800,
+                    color: color.withValues(alpha: 0.88),
+                    letterSpacing: 0.4,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 6),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
               formatCurrency(amount, currencySymbol),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
                 color: color,
               ),
             ),

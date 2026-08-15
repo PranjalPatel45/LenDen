@@ -44,7 +44,7 @@ class GlassCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: AppColors.primaryText.withValues(alpha: 0.04),
-            blurRadius: 14,
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -52,7 +52,7 @@ class GlassCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(radius),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: Container(
             alignment: alignment,
             decoration: BoxDecoration(
@@ -146,17 +146,17 @@ class GlassInput extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.input),
           border: Border.all(
             color: focused
-                ? AppColors.highlight.withValues(alpha: 0.72)
-                : AppColors.glassCardBorder,
-            width: focused ? 1.5 : 1,
+                ? AppColors.highlight
+                : AppColors.primaryText.withValues(alpha: 0.12),
+            width: focused ? 1.8 : 1,
           ),
           boxShadow: [
             BoxShadow(
               color: focused
-                  ? AppColors.highlight.withValues(alpha: 0.14)
-                  : AppColors.primary.withValues(alpha: 0.07),
-              blurRadius: focused ? 16 : 12,
-              offset: const Offset(0, 5),
+                  ? AppColors.highlight.withValues(alpha: 0.12)
+                  : AppColors.primaryText.withValues(alpha: 0.03),
+              blurRadius: focused ? 14 : 8,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -169,29 +169,29 @@ class GlassInput extends StatelessWidget {
           onChanged: onChanged,
           inputFormatters: inputFormatters,
           style: const TextStyle(
-            color: AppColors.black,
+            color: AppColors.primaryText,
             fontSize: 16,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             hintText: effectiveHint,
             floatingLabelBehavior: FloatingLabelBehavior.never,
-            hintStyle: TextStyle(
-              color: AppColors.black.withValues(alpha: 0.38),
+            hintStyle: const TextStyle(
+              color: AppColors.secondaryText,
               fontSize: 15,
               fontWeight: FontWeight.w400,
             ),
             prefixIcon: prefixIcon != null
                 ? SizedBox(
-                    width: 40,
-                    height: 48,
+                    width: 44,
+                    height: AppSize.fieldHeight,
                     child: Center(child: prefixIcon),
                   )
                 : null,
             suffixIcon: suffixIcon != null
                 ? SizedBox(
-                    width: 40,
-                    height: 48,
+                    width: 44,
+                    height: AppSize.fieldHeight,
                     child: Center(child: suffixIcon),
                   )
                 : null,
@@ -204,7 +204,7 @@ class GlassInput extends StatelessWidget {
             filled: false,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
-              vertical: 14,
+              vertical: 16,
             ),
           ),
         ),
@@ -223,8 +223,8 @@ class GlassInput extends StatelessWidget {
               style: const TextStyle(
                 color: AppColors.primaryText,
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.1,
               ),
             ),
           ),

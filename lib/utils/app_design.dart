@@ -13,9 +13,9 @@ abstract final class AppSpacing {
 }
 
 abstract final class AppRadius {
-  static const double input = 14;
+  static const double input = 16;
   static const double card = 20;
-  static const double sheet = 24;
+  static const double sheet = 28;
   static const double pill = 999;
 }
 
@@ -46,13 +46,12 @@ class AppBackground extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          stops: const [0, 0.34, 0.68, 1],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: const [0.0, 0.45, 1.0],
           colors: [
             AppColors.background,
-            AppColors.primary.withValues(alpha: 0.10),
-            AppColors.softPeach.withValues(alpha: 0.10),
+            AppColors.primary.withValues(alpha: 0.06),
             AppColors.background,
           ],
         ),
