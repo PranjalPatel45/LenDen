@@ -41,15 +41,21 @@ class ContactDetailScreen extends StatefulWidget {
 class _ContactDetailScreenState extends State<ContactDetailScreen> {
   final Set<dynamic> _restoredExpenseKeys = <dynamic>{};
 
-  void _navigateAndAddExpense() async {
+  void _navigateAndAddExpense({String? defaultType}) async {
     final newExpense = await Navigator.push<Expense>(
       context,
       AppTransitions.slideUp<Expense>(
         page: AddTodoScreen(
           prefillContactName: widget.contactName,
           prefillPhoneNumber: widget.phoneNumber,
-          allowedTypes: TransactionType.contactTypes,
-          title: 'Lend or Borrow with ${widget.contactName}',
+          allowedTypes: defaultType != null
+              ? [defaultType]
+              : TransactionType.contactTypes,
+          title: defaultType == TransactionType.lent
+              ? 'Lend to ${widget.contactName}'
+              : defaultType == TransactionType.borrowed
+                  ? 'Borrow from ${widget.contactName}'
+                  : 'Lend or Borrow with ${widget.contactName}',
           settingsRepository: widget.settingsRepository,
         ),
       ),
@@ -142,15 +148,14 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
         pressedScale: 0.94,
         hoverScale: 1.025,
         child: FloatingActionButton.extended(
-          onPressed: _navigateAndAddExpense,
-          backgroundColor: AppColors.highlight,
+          onPressed: () => _navigateAndAddExpense(),
+          backgroundColor: AppColors.primary,
           foregroundColor: AppColors.white,
-          elevation: 3,
-          highlightElevation: 1,
-          icon: const Icon(Icons.add_rounded, size: 22),
+          elevation: 4,
+          icon: const Icon(Icons.add_rounded, size: 24),
           label: const Text(
             'Lend / Borrow',
-            style: TextStyle(fontWeight: FontWeight.w700),
+            style: TextStyle(fontWeight: FontWeight.w800),
           ),
         ),
       ),
@@ -187,13 +192,13 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                 statusColor = AppColors.borrowedColorDark;
               } else {
                 dynamicStatus = 'All settled up with ${widget.contactName}';
-                statusColor = AppColors.grey;
+                statusColor = AppColors.secondaryText;
               }
 
               return ResponsiveContent(
                 maxWidth: 760,
                 child: ListView.builder(
-                  padding: const EdgeInsets.only(top: 12, bottom: 88),
+                  padding: const EdgeInsets.only(top: 12, bottom: 92),
                   itemCount: contactExpenses.isEmpty
                       ? 1
                       : contactExpenses.length + 1,
@@ -202,8 +207,8 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                       return Padding(
                         padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
                         child: GlassCard(
-                          radius: 20,
-                          padding: const EdgeInsets.all(18),
+                          radius: 24,
+                          padding: const EdgeInsets.all(20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -212,20 +217,22 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                                   Hero(
                                     tag: 'contact-avatar-${widget.contactName}',
                                     child: CircleAvatar(
-                                      backgroundColor: AppColors.highlight
-                                          .withValues(alpha: 0.12),
+                                      radius: 24,
+                                      backgroundColor: AppColors.softLavender,
                                       child: Text(
                                         widget.contactName.isNotEmpty
-                                            ? widget.contactName[0].toUpperCase()
+                                            ? widget.contactName[0]
+                                                .toUpperCase()
                                             : '?',
                                         style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.highlight,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 18,
+                                          color: AppColors.primary,
                                         ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
+                                  const SizedBox(width: 14),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -234,8 +241,9 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                                         Text(
                                           widget.contactName,
                                           style: const TextStyle(
-                                            fontSize: 18,
+                                            fontSize: 20,
                                             fontWeight: FontWeight.w800,
+                                            color: AppColors.primaryText,
                                           ),
                                         ),
                                         if (widget.phoneNumber != null &&
@@ -244,41 +252,32 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                                             widget.phoneNumber!,
                                             style: TextStyle(
                                               fontSize: 13,
-                                              color: AppColors.primaryText
-                                                  .withValues(alpha: 0.6),
+                                              color: AppColors.secondaryText,
+                                              fontWeight: FontWeight.w500,
                                             ),
                                           ),
                                       ],
                                     ),
                                   ),
                                   if (netBalance != 0)
-                                    TextButton.icon(
+                                    ElevatedButton.icon(
                                       onPressed: () => _settleBalance(
                                         netBalance,
                                         currencySymbol,
                                       ),
                                       icon: const Icon(
-                                        Icons.check_circle_outline_rounded,
+                                        Icons.check_circle_rounded,
                                         size: 16,
                                       ),
-                                      label: const Text(
-                                        'Settle',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: AppColors.highlight,
-                                        backgroundColor: AppColors.highlight
-                                            .withValues(alpha: 0.1),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 6,
-                                        ),
+                                      label: const Text('Settle Up'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primary,
+                                        foregroundColor: AppColors.white,
                                         minimumSize: Size.zero,
-                                        tapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
                                       ),
                                     ),
                                 ],
@@ -287,86 +286,77 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                               Container(
                                 width: double.infinity,
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 12,
+                                  horizontal: 16,
+                                  vertical: 14,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: statusColor.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(12),
+                                  color: statusColor.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: statusColor.withValues(alpha: 0.2),
+                                    color: statusColor.withValues(alpha: 0.25),
                                   ),
                                 ),
                                 child: Text(
                                   dynamicStatus,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 15.5,
                                     fontWeight: FontWeight.w800,
                                     color: statusColor,
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 14),
+                              const SizedBox(height: 16),
                               Row(
                                 children: [
                                   Expanded(
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          'Lent',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.primaryText
-                                                .withValues(alpha: 0.6),
-                                          ),
+                                    child: OutlinedButton.icon(
+                                      onPressed: () =>
+                                          _navigateAndAddExpense(
+                                        defaultType: TransactionType.lent,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.north_east_rounded,
+                                        size: 16,
+                                        color: AppColors.lendColorDark,
+                                      ),
+                                      label: const Text('Lend Money'),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: AppColors.lendColorDark,
+                                        side: BorderSide(
+                                          color: AppColors.lendColorDark
+                                              .withValues(alpha: 0.3),
                                         ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          formatCurrency(
-                                            totalLent,
-                                            currencySymbol,
-                                          ),
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppColors.lendColorDark,
-                                          ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 12,
                                         ),
-                                      ],
+                                      ),
                                     ),
                                   ),
-                                  Container(
-                                    height: 30,
-                                    width: 1,
-                                    color: AppColors.primaryText.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                  ),
+                                  const SizedBox(width: 12),
                                   Expanded(
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          'Borrowed',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.primaryText
-                                                .withValues(alpha: 0.6),
-                                          ),
+                                    child: OutlinedButton.icon(
+                                      onPressed: () =>
+                                          _navigateAndAddExpense(
+                                        defaultType: TransactionType.borrowed,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.south_west_rounded,
+                                        size: 16,
+                                        color: AppColors.borrowedColorDark,
+                                      ),
+                                      label: const Text('Borrow Money'),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor:
+                                            AppColors.borrowedColorDark,
+                                        side: BorderSide(
+                                          color: AppColors.borrowedColorDark
+                                              .withValues(alpha: 0.3),
                                         ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          formatCurrency(
-                                            totalBorrowed,
-                                            currencySymbol,
-                                          ),
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppColors.borrowedColorDark,
-                                          ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 12,
                                         ),
-                                      ],
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -382,9 +372,9 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                         padding: const EdgeInsets.all(24),
                         child: GlassEmptyState(
                           icon: Icons.receipt_long_outlined,
-                          title: 'No transactions',
+                          title: 'No transactions yet',
                           message:
-                              'Tap "Lend / Borrow" below to add a transaction with ${widget.contactName}.',
+                              'Tap "+ Lend" or "- Borrow" above to record money with ${widget.contactName}.',
                         ),
                       );
                     }
@@ -396,8 +386,6 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                       currencySymbol: currencySymbol,
                       onEdit: () => _navigateToEditExpense(expense),
                       onDelete: () => deleteExpenseWithUndo(
-                        // The list item context can unmount during deletion;
-                        // keep the stable screen context for the Undo overlay.
                         context: this.context,
                         expense: expense,
                         expenseRepository: widget.expenseRepository,

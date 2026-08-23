@@ -6,11 +6,14 @@ import '../utils/app_colors.dart';
 import '../utils/app_design.dart';
 import '../utils/app_motion.dart';
 
-/// Premium iOS-inspired Liquid Glass surface.
+/// Premium Light Liquid-Glass Surface.
 ///
-/// Notes:
-/// - Uses BackdropFilter blur for the frosted/glass effect.
-/// - Uses ONLY colors derived from AppColors palette (with alpha).
+/// Features:
+/// - Translucent base surface
+/// - Controlled backdrop blur (sigmaX: 12, sigmaY: 12)
+/// - Specular highlight border
+/// - Ambient depth shadow
+/// - 100% text contrast and daylight legibility
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -43,22 +46,27 @@ class GlassCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryText.withValues(alpha: 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            color: AppColors.primary.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: AppColors.primaryText.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(radius),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: Container(
             alignment: alignment,
             decoration: BoxDecoration(
               color: effectiveGlass,
               borderRadius: BorderRadius.circular(radius),
-              border: Border.all(color: effectiveBorder, width: 1),
+              border: Border.all(color: effectiveBorder, width: 1.2),
             ),
             child: Stack(
               children: [
@@ -73,7 +81,7 @@ class GlassCard extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: padding ?? const EdgeInsets.all(16),
+                  padding: padding ?? const EdgeInsets.all(18),
                   child: child,
                 ),
               ],
@@ -146,14 +154,14 @@ class GlassInput extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.input),
           border: Border.all(
             color: focused
-                ? AppColors.highlight
+                ? AppColors.primary
                 : AppColors.primaryText.withValues(alpha: 0.12),
-            width: focused ? 1.8 : 1,
+            width: focused ? 2.0 : 1.0,
           ),
           boxShadow: [
             BoxShadow(
               color: focused
-                  ? AppColors.highlight.withValues(alpha: 0.12)
+                  ? AppColors.primary.withValues(alpha: 0.14)
                   : AppColors.primaryText.withValues(alpha: 0.03),
               blurRadius: focused ? 14 : 8,
               offset: const Offset(0, 4),
@@ -171,7 +179,7 @@ class GlassInput extends StatelessWidget {
           style: const TextStyle(
             color: AppColors.primaryText,
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
           decoration: InputDecoration(
             hintText: effectiveHint,
@@ -223,7 +231,7 @@ class GlassInput extends StatelessWidget {
               style: const TextStyle(
                 color: AppColors.primaryText,
                 fontSize: 13,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
                 letterSpacing: 0.1,
               ),
             ),
@@ -268,30 +276,31 @@ class GlassButton extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(radius),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
                 onTap: effectiveOnPressed,
                 child: Container(
-                  constraints: const BoxConstraints(minHeight: 48),
+                  constraints: const BoxConstraints(minHeight: 50),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
+                    horizontal: 20,
                     vertical: 14,
                   ),
                   decoration: BoxDecoration(
-                    color: color ?? AppColors.highlight,
+                    color: color ?? AppColors.primary,
                     borderRadius: BorderRadius.circular(radius),
                     border: Border.all(
-                      color: color == null || color == AppColors.highlight
-                          ? AppColors.highlight
+                      color: color == null || color == AppColors.primary
+                          ? AppColors.primary
                           : AppColors.glassCardBorder,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primaryText.withValues(alpha: 0.08),
-                        blurRadius: 12,
-                        offset: const Offset(0, 5),
+                        color: (color ?? AppColors.primary)
+                            .withValues(alpha: 0.24),
+                        blurRadius: 14,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
@@ -299,7 +308,8 @@ class GlassButton extends StatelessWidget {
                     style: TextStyle(
                       color: foregroundColor ?? AppColors.white,
                       fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
                     ),
                     textAlign: TextAlign.center,
                     child: isLoading
@@ -309,7 +319,7 @@ class GlassButton extends StatelessWidget {
                               child: SizedBox.square(
                                 dimension: 18,
                                 child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                                  strokeWidth: 2.2,
                                   color: foregroundColor ?? AppColors.white,
                                 ),
                               ),
@@ -345,25 +355,25 @@ class GlassEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return EntranceMotion(
       child: GlassCard(
-        radius: 18,
+        radius: 24,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
-          vertical: 28,
+          vertical: 32,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 60,
-              height: 60,
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                color: AppColors.highlight.withValues(alpha: 0.11),
+                borderRadius: BorderRadius.circular(20),
+                color: AppColors.primary.withValues(alpha: 0.12),
                 border: Border.all(
-                  color: AppColors.highlight.withValues(alpha: 0.16),
+                  color: AppColors.primary.withValues(alpha: 0.18),
                 ),
               ),
-              child: Icon(icon, size: 28, color: AppColors.highlight),
+              child: Icon(icon, size: 30, color: AppColors.primary),
             ),
             const SizedBox(height: 20),
             Text(
@@ -376,8 +386,8 @@ class GlassEmptyState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.primaryText.withValues(alpha: 0.64),
-              ),
+                    color: AppColors.secondaryText,
+                  ),
             ),
             if (action != null) ...[
               const SizedBox(height: AppSpacing.lg),
@@ -409,9 +419,9 @@ class GlassLoadingState extends StatelessWidget {
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.secondaryText,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: AppColors.secondaryText,
+                      fontWeight: FontWeight.w700,
+                    ),
               ),
               const SizedBox(height: 18),
               ...List.generate(
@@ -421,11 +431,11 @@ class GlassLoadingState extends StatelessWidget {
                   child: Row(
                     children: [
                       Container(
-                        width: 38,
-                        height: 38,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
                           color: AppColors.primaryText.withValues(alpha: 0.07),
-                          borderRadius: BorderRadius.circular(11),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -436,12 +446,12 @@ class GlassLoadingState extends StatelessWidget {
                             FractionallySizedBox(
                               widthFactor: index == 1 ? 0.72 : 0.88,
                               child: Container(
-                                height: 10,
+                                height: 12,
                                 decoration: BoxDecoration(
                                   color: AppColors.primaryText.withValues(
                                     alpha: 0.09,
                                   ),
-                                  borderRadius: BorderRadius.circular(5),
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
                               ),
                             ),
@@ -449,7 +459,7 @@ class GlassLoadingState extends StatelessWidget {
                             FractionallySizedBox(
                               widthFactor: 0.56,
                               child: Container(
-                                height: 8,
+                                height: 9,
                                 decoration: BoxDecoration(
                                   color: AppColors.primaryText.withValues(
                                     alpha: 0.055,

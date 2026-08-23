@@ -11,7 +11,6 @@ import 'contact_detail_screen.dart';
 
 import '../utils/app_colors.dart';
 import '../utils/app_design.dart';
-import '../utils/app_motion.dart';
 import '../utils/app_transitions.dart';
 import '../widget/glass_widgets.dart';
 
@@ -111,7 +110,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
   Future<void> _requestPermissionAndLoad() async {
     setState(() => _isLoading = true);
     try {
-      final status = await FlutterContacts.permissions.request(PermissionType.read);
+      final status =
+          await FlutterContacts.permissions.request(PermissionType.read);
       if (!mounted) return;
 
       if (status == PermissionStatus.granted) {
@@ -172,7 +172,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
       }
     }
 
-    combined.sort((a, b) => (a.displayName ?? '').compareTo(b.displayName ?? ''));
+    combined
+        .sort((a, b) => (a.displayName ?? '').compareTo(b.displayName ?? ''));
     _cachedContacts = combined;
 
     if (!mounted) return;
@@ -263,7 +264,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: GlassLoadingState(label: 'Loading contacts…'));
+      return const Center(
+          child: GlassLoadingState(label: 'Loading contacts…'));
     }
 
     if (!_isPermissionGranted) {
@@ -289,105 +291,87 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
           if (expense.type == TransactionType.lent) {
             totalLent += expense.amount;
-            contactBalances[cName] = (contactBalances[cName] ?? 0) + expense.amount;
+            contactBalances[cName] =
+                (contactBalances[cName] ?? 0) + expense.amount;
           } else if (expense.type == TransactionType.borrowed) {
             totalBorrowed += expense.amount;
-            contactBalances[cName] = (contactBalances[cName] ?? 0) - expense.amount;
+            contactBalances[cName] =
+                (contactBalances[cName] ?? 0) - expense.amount;
           }
           lastContactExpense[cName] = expense;
         }
 
         final netLending = totalLent - totalBorrowed;
         final currencySymbol = widget.settingsRepository.currencySymbol;
-
         final recentContactNames = lastContactExpense.keys.toList();
 
         return ResponsiveContent(
           maxWidth: 760,
           child: RepaintBoundary(
             child: CustomScrollView(
-            slivers: [
-              // 1. Financial Summary Card (Scrolls away)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-                  child: GlassCard(
-                    radius: 20,
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.people_alt_rounded,
-                              size: 20,
-                              color: AppColors.highlight,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'MONEY WITH PEOPLE',
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: AppColors.primaryText.withValues(alpha: 0.64),
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.5,
+              slivers: [
+                // 1. Financial Summary Card (Money With People)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                    child: GlassCard(
+                      radius: 22,
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary
+                                      .withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.people_alt_rounded,
+                                  size: 20,
+                                  color: AppColors.primary,
+                                ),
                               ),
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              onPressed: () => unawaited(_showAddManualContactDialog()),
-                              icon: const Icon(Icons.person_add_alt_1_rounded),
-                              tooltip: 'Add manual contact',
-                              color: AppColors.highlight,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Total Lent',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.primaryText.withValues(alpha: 0.6),
+                              const SizedBox(width: 10),
+                              Text(
+                                'MONEY WITH PEOPLE',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge
+                                    ?.copyWith(
+                                      color: AppColors.secondaryText,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.6,
+                                      fontSize: 11,
                                     ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      formatCurrency(totalLent, currencySymbol),
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.lendColorDark,
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               ),
-                            ),
-                            Container(
-                              height: 36,
-                              width: 1,
-                              color: AppColors.primaryText.withValues(alpha: 0.1),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 16),
+                              const Spacer(),
+                              IconButton(
+                                onPressed: () =>
+                                    unawaited(_showAddManualContactDialog()),
+                                icon:
+                                    const Icon(Icons.person_add_alt_1_rounded),
+                                tooltip: 'Add manual contact',
+                                color: AppColors.primary,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          Row(
+                            children: [
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Total Borrowed',
+                                      'Total Lent',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: AppColors.primaryText.withValues(alpha: 0.6),
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.secondaryText,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
@@ -395,320 +379,374 @@ class _ConnectScreenState extends State<ConnectScreen> {
                                       fit: BoxFit.scaleDown,
                                       alignment: Alignment.centerLeft,
                                       child: Text(
-                                        formatCurrency(totalBorrowed, currencySymbol),
+                                        formatCurrency(
+                                            totalLent, currencySymbol),
                                         style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w700,
-                                          color: AppColors.borrowedColorDark,
+                                          fontSize: 19,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.lendColorDark,
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: AppColors.white.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Net Balance:',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.primaryText.withValues(alpha: 0.7),
-                                ),
+                              Container(
+                                height: 38,
+                                width: 1,
+                                color: AppColors.primaryText
+                                    .withValues(alpha: 0.1),
                               ),
-                              const Spacer(),
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  '${netLending >= 0 ? '+' : '-'}${formatCurrency(netLending.abs(), currencySymbol)}',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
-                                    color: netLending >= 0
-                                        ? AppColors.lendColorDark
-                                        : AppColors.borrowedColorDark,
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Total Borrowed',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.secondaryText,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          formatCurrency(
+                                              totalBorrowed, currencySymbol),
+                                          style: const TextStyle(
+                                            fontSize: 19,
+                                            fontWeight: FontWeight.w800,
+                                            color: AppColors.borrowedColorDark,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
                             ],
                           ),
+                          const SizedBox(height: 14),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: AppColors.white.withValues(alpha: 0.65),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: AppColors.primaryText
+                                    .withValues(alpha: 0.07),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Text(
+                                  'Net Contact Balance:',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primaryText,
+                                  ),
+                                ),
+                                const Spacer(),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    '${netLending >= 0 ? '+' : '-'}${formatCurrency(netLending.abs(), currencySymbol)}',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                      color: netLending >= 0
+                                          ? AppColors.lendColorDark
+                                          : AppColors.borrowedColorDark,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 2. Sticky Floating Liquid-Glass Search Bar
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _StickySearchHeaderDelegate(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+                      child: GlassInput(
+                        controller: _searchController,
+                        hintText: 'Search contacts by name or phone…',
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 3. Recent Contacts (Horizontal Activity Scroll)
+                if (recentContactNames.isNotEmpty &&
+                    _searchController.text.isEmpty) ...[
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(18, 12, 18, 8),
+                      child: SectionLabel(
+                        label:
+                            'Active Ledger History (${recentContactNames.length})',
+                        icon: Icons.history_rounded,
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        itemCount: recentContactNames.length,
+                        itemBuilder: (context, index) {
+                          final name = recentContactNames[index];
+                          final balance = contactBalances[name] ?? 0;
+                          final lastEx = lastContactExpense[name];
+                          final phone = lastEx?.phoneNumber;
+
+                          return Container(
+                            width: 148,
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 4),
+                            child: Material(
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              elevation: 2,
+                              shadowColor: AppColors.primaryText
+                                  .withValues(alpha: 0.05),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () {
+                                  unawaited(
+                                    Navigator.push(
+                                      context,
+                                      AppTransitions.slideRight(
+                                        page: ContactDetailScreen(
+                                          contactName: name,
+                                          phoneNumber: phone,
+                                          expenseRepository:
+                                              widget.expenseRepository,
+                                          settingsRepository:
+                                              widget.settingsRepository,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 13.5,
+                                          color: AppColors.primaryText,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        balance == 0
+                                            ? 'Settled Up'
+                                            : balance > 0
+                                                ? 'Owes you ${formatCurrency(balance, currencySymbol)}'
+                                                : 'You owe ${formatCurrency(balance.abs(), currencySymbol)}',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: balance > 0
+                                              ? AppColors.lendColorDark
+                                              : balance < 0
+                                                  ? AppColors.borrowedColorDark
+                                                  : AppColors.secondaryText,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+
+                // 4. All Contacts Header
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 14, 18, 8),
+                    child: Row(
+                      children: [
+                        SectionLabel(
+                          label: 'All Contacts (${_filteredContacts.length})',
+                          icon: Icons.people_alt_rounded,
+                        ),
+                        const Spacer(),
+                        TextButton.icon(
+                          onPressed: () =>
+                              unawaited(_showAddManualContactDialog()),
+                          icon: const Icon(Icons.add, size: 16),
+                          label: const Text('Manual'),
                         ),
                       ],
                     ),
                   ),
                 ),
-              ),
 
-              // 2. Sticky Search Bar
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _StickySearchHeaderDelegate(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                    child: FocusMotion(
-                      builder: (context, focused, duration) => AnimatedContainer(
-                        duration: duration,
-                        curve: Curves.easeOutCubic,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(AppRadius.input),
-                          color: AppColors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: focused
-                                  ? AppColors.highlight.withValues(alpha: 0.12)
-                                  : AppColors.primaryText.withValues(alpha: 0.045),
-                              blurRadius: focused ? 14 : 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: TextField(
-                          controller: _searchController,
-                          textInputAction: TextInputAction.search,
-                          decoration: const InputDecoration(
-                            hintText: 'Search contacts',
-                            prefixIcon: Icon(Icons.search_rounded),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // 3. Recent Contacts (Scrolls away)
-              if (recentContactNames.isNotEmpty && _searchController.text.isEmpty) ...[
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 12, 18, 8),
-                    child: SectionLabel(
-                      label: 'Recent Activity (${recentContactNames.length})',
-                      icon: Icons.history_rounded,
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 94,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      itemCount: recentContactNames.length,
-                      itemBuilder: (context, index) {
-                        final name = recentContactNames[index];
-                        final balance = contactBalances[name] ?? 0;
-                        final lastEx = lastContactExpense[name];
-                        final phone = lastEx?.phoneNumber;
-
-                        return Container(
-                          width: 140,
-                          margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
-                          child: Material(
-                            color: AppColors.white.withValues(alpha: 0.75),
-                            borderRadius: BorderRadius.circular(14),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(14),
-                              onTap: () {
-                                unawaited(
-                                  Navigator.push(
-                                    context,
-                                    AppTransitions.slideRight(
-                                      page: ContactDetailScreen(
-                                        contactName: name,
-                                        phoneNumber: phone,
-                                        expenseRepository: widget.expenseRepository,
-                                        settingsRepository: widget.settingsRepository,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      balance == 0
-                                          ? 'Settled up'
-                                          : balance > 0
-                                              ? 'Owes you ${formatCurrency(balance, currencySymbol)}'
-                                              : 'You owe ${formatCurrency(balance.abs(), currencySymbol)}',
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: balance > 0
-                                            ? AppColors.lendColorDark
-                                            : balance < 0
-                                                ? AppColors.borrowedColorDark
-                                                : AppColors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                // 5. All Contacts List
+                _filteredContacts.isEmpty
+                    ? SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Center(
+                            child: Text(
+                              _searchController.text.isNotEmpty
+                                  ? 'No contacts match "${_searchController.text}"'
+                                  : 'No contacts available. Tap + Manual to create one.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: AppColors.secondaryText,
                               ),
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      )
+                    : SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final contact = _filteredContacts[index];
+                            final phone = contact.phones.isNotEmpty
+                                ? contact.phones.first.number
+                                : 'No phone number';
+
+                            return Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: AppColors.primaryText
+                                      .withValues(alpha: 0.06),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primaryText
+                                        .withValues(alpha: 0.03),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: ListTile(
+                                leading: Container(
+                                  width: 42,
+                                  height: 42,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(14),
+                                    color: AppColors.softLavender,
+                                  ),
+                                  child: Text(
+                                    _getInitials(contact.displayName),
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ),
+                                title: Text(
+                                  contact.displayName ?? 'No Name',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                subtitle: Text(
+                                  phone,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: AppColors.secondaryText,
+                                      ),
+                                ),
+                                trailing: const Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 22,
+                                  color: AppColors.grey,
+                                ),
+                                onTap: () {
+                                  unawaited(
+                                    Navigator.push(
+                                      context,
+                                      AppTransitions.slideRight(
+                                        page: ContactDetailScreen(
+                                          contactName:
+                                              contact.displayName ?? 'No Name',
+                                          phoneNumber: phone != 'No phone number'
+                                              ? phone
+                                              : null,
+                                          expenseRepository:
+                                              widget.expenseRepository,
+                                          settingsRepository:
+                                              widget.settingsRepository,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                          childCount: _filteredContacts.length,
+                        ),
+                      ),
+
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).padding.bottom + 92,
                   ),
                 ),
               ],
-
-              // 4. All Contacts Header
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 8),
-                  child: Row(
-                    children: [
-                      SectionLabel(
-                        label: 'All Contacts (${_filteredContacts.length})',
-                        icon: Icons.people_alt_rounded,
-                      ),
-                      const Spacer(),
-                      TextButton.icon(
-                        onPressed: () => unawaited(_showAddManualContactDialog()),
-                        icon: const Icon(Icons.add, size: 16),
-                        label: const Text('Manual'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // 5. All Contacts List
-              _filteredContacts.isEmpty
-                  ? SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Center(
-                          child: Text(
-                            _searchController.text.isNotEmpty
-                                ? 'No contacts match "${_searchController.text}"'
-                                : 'No contacts available. Tap + Manual to create one.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: AppColors.primaryText.withValues(alpha: 0.6),
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  : SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final contact = _filteredContacts[index];
-                          final phone = contact.phones.isNotEmpty
-                              ? contact.phones.first.number
-                              : 'No phone number';
-
-                          return Container(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.white.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: AppColors.primaryText.withValues(alpha: 0.055),
-                              ),
-                            ),
-                            child: ListTile(
-                              leading: Container(
-                                width: 40,
-                                height: 40,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: AppColors.softLavender.withValues(alpha: 0.62),
-                                ),
-                                child: Text(
-                                  _getInitials(contact.displayName),
-                                  style: const TextStyle(
-                                    color: AppColors.primaryText,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              title: Text(
-                                contact.displayName ?? 'No Name',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              subtitle: Text(
-                                phone,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.primaryText.withValues(alpha: 0.6),
-                                ),
-                              ),
-                              trailing: const Icon(
-                                Icons.chevron_right_rounded,
-                                size: 20,
-                                color: AppColors.grey,
-                              ),
-                              onTap: () {
-                                unawaited(
-                                  Navigator.push(
-                                    context,
-                                    AppTransitions.slideRight(
-                                      page: ContactDetailScreen(
-                                        contactName: contact.displayName ?? 'No Name',
-                                        phoneNumber: phone != 'No phone number' ? phone : null,
-                                        expenseRepository: widget.expenseRepository,
-                                        settingsRepository: widget.settingsRepository,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
-                        childCount: _filteredContacts.length,
-                      ),
-                    ),
-
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: MediaQuery.of(context).padding.bottom + 88,
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   Widget _buildExplanationView() {
     return ResponsiveContent(
@@ -716,8 +754,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: GlassCard(
-            radius: 24,
-            padding: const EdgeInsets.all(28),
+            radius: 26,
+            padding: const EdgeInsets.all(30),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -725,13 +763,13 @@ class _ConnectScreenState extends State<ConnectScreen> {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: AppColors.highlight.withValues(alpha: 0.12),
+                    color: AppColors.primary.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.people_alt_rounded,
                     size: 38,
-                    color: AppColors.highlight,
+                    color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -739,8 +777,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
                   'Track Money With People',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                        fontWeight: FontWeight.w800,
+                      ),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -748,8 +786,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.primaryText.withValues(alpha: 0.72),
-                    height: 1.4,
+                    color: AppColors.secondaryText,
+                    height: 1.45,
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -757,7 +795,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
                   width: double.infinity,
                   child: GlassButton(
                     onPressed: () => unawaited(_requestPermissionAndLoad()),
-                    color: AppColors.highlight,
+                    color: AppColors.primary,
                     foregroundColor: AppColors.white,
                     child: const Text('Grant Access'),
                   ),
@@ -796,19 +834,22 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
   _StickySearchHeaderDelegate({required this.child});
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-      color: AppColors.background,
+      color: AppColors.background.withValues(alpha: 0.92),
       child: child,
     );
   }
 
   @override
-  double get maxExtent => 68.0;
+  double get maxExtent => 68;
 
   @override
-  double get minExtent => 68.0;
+  double get minExtent => 68;
 
   @override
-  bool shouldRebuild(covariant _StickySearchHeaderDelegate oldDelegate) => true;
+  bool shouldRebuild(covariant _StickySearchHeaderDelegate oldDelegate) {
+    return oldDelegate.child != child;
+  }
 }

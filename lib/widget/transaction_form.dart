@@ -37,7 +37,7 @@ class TransactionForm extends StatelessWidget {
     this.settingsRepository = const SettingsRepository(),
     this.isSubmitting = false,
     this.typeItemTextColor = AppColors.primaryText,
-    this.submitColor = AppColors.highlight,
+    this.submitColor = AppColors.primary,
     this.submitForegroundColor = AppColors.white,
   });
 
@@ -74,52 +74,112 @@ class TransactionForm extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       child: EntranceMotion(
         child: GlassCard(
-          radius: 18,
-          padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+          radius: 26,
+          padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
+              Text(
+                headerTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                headerSubtitle,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 24),
+
+              // Hero Amount Input Card
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.22),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      headerTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      headerSubtitle,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    const Text(
+                      'AMOUNT',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
                         color: AppColors.secondaryText,
+                        letterSpacing: 0.6,
                       ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Text(
+                          currencySymbol,
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: amountController,
+                            autofocus: true,
+                            style: const TextStyle(
+                              fontSize: 34,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primaryText,
+                              letterSpacing: -1.0,
+                            ),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d*\.?\d{0,2}')),
+                              LengthLimitingTextInputFormatter(12),
+                            ],
+                            decoration: const InputDecoration(
+                              hintText: '0.00',
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              filled: false,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              GlassInput(
-                controller: amountController,
-                fieldLabel: 'Amount',
-                hintText: '0.00',
-                prefixIcon: Text(
-                  currencySymbol,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryText,
-                  ),
-                ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-                  LengthLimitingTextInputFormatter(12),
-                ],
+              const SizedBox(height: 20),
+
+              // Transaction Type Selector
+              ExpenseTypeField(
+                selectedType: selectedType,
+                fieldLabel: 'Transaction Type',
+                types: allowedTypes,
+                itemTextColor: typeItemTextColor,
+                onChanged: onTypeChanged,
               ),
+
               if (showTitleField) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 GlassInput(
                   controller: titleController,
                   fieldLabel: titleFieldLabel,
@@ -128,7 +188,7 @@ class TransactionForm extends StatelessWidget {
                   prefixIcon: isTitleReadOnly
                       ? const Icon(
                           Icons.person_outline_rounded,
-                          color: AppColors.highlight,
+                          color: AppColors.primary,
                         )
                       : titleFieldPrefixIcon,
                   suffixIcon: isTitleReadOnly
@@ -140,17 +200,10 @@ class TransactionForm extends StatelessWidget {
                       : null,
                 ),
               ],
-              const SizedBox(height: 16),
-              ExpenseTypeField(
-                selectedType: selectedType,
-                fieldLabel: 'Transaction Type',
-                types: allowedTypes,
-                itemTextColor: typeItemTextColor,
-                onChanged: onTypeChanged,
-              ),
+
               if (onCategoryChanged != null &&
                   !TransactionType.isContactType(selectedType ?? '')) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 CategoryField(
                   selectedCategory: selectedCategory,
                   categories: categories,
@@ -158,24 +211,26 @@ class TransactionForm extends StatelessWidget {
                   settingsRepository: settingsRepository,
                 ),
               ],
-              const SizedBox(height: 16),
+
+              const SizedBox(height: 18),
               GlassInput(
                 controller: reasonController,
-                fieldLabel: 'Reason (Optional)',
-                hintText: 'Add a note...',
+                fieldLabel: 'Note / Details (Optional)',
+                hintText: 'Add notes…',
                 prefixIcon: const Icon(
                   Icons.notes_rounded,
                   color: AppColors.secondaryText,
                 ),
               ),
-              const SizedBox(height: 16),
+
+              const SizedBox(height: 18),
               GlassInput(
                 controller: dateController,
                 fieldLabel: 'Date',
                 hintText: 'Select date',
                 prefixIcon: const Icon(
                   Icons.calendar_month_rounded,
-                  color: AppColors.secondaryText,
+                  color: AppColors.primary,
                 ),
                 suffixIcon: const Icon(
                   Icons.arrow_forward_rounded,
@@ -185,24 +240,25 @@ class TransactionForm extends StatelessWidget {
                 readOnly: true,
                 onTap: onDateTap,
               ),
-              const SizedBox(height: 26),
+
+              const SizedBox(height: 28),
               Row(
                 children: [
                   Expanded(
                     child: GlassButton(
                       onPressed: onCancel,
-                      radius: 14,
+                      radius: 16,
                       color: AppColors.white,
                       foregroundColor: AppColors.primaryText,
                       child: const Text('Cancel'),
                     ),
                   ),
-                  const SizedBox(width: 15),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: GlassButton(
                       onPressed: isSubmitting ? null : onSubmit,
                       isLoading: isSubmitting,
-                      radius: 14,
+                      radius: 16,
                       color: submitColor,
                       foregroundColor: submitForegroundColor,
                       child: Text(submitLabel),

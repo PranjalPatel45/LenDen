@@ -12,8 +12,8 @@ import '../widget/expense_tile.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_snackbar.dart';
 import '../utils/app_design.dart';
-import '../utils/expense_period.dart';
 import '../utils/app_motion.dart';
+import '../utils/expense_period.dart';
 import '../utils/delete_restore.dart';
 import '../utils/transaction_type.dart';
 import '../utils/glass_toast.dart';
@@ -109,13 +109,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _navigateAndAddCashFlow() async {
+  void _navigateAndAddTransaction({
+    List<String>? allowedTypes,
+    String? title,
+  }) async {
     final newExpense = await Navigator.push<Expense>(
       context,
       AppTransitions.slideUp<Expense>(
         page: AddTodoScreen(
-          allowedTypes: TransactionType.cashFlowTypes,
-          title: 'Add Income or Expense',
+          allowedTypes: allowedTypes ?? TransactionType.all,
+          title: title ?? 'Add Transaction',
           settingsRepository: widget.settingsRepository,
         ),
       ),
@@ -210,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
             }
           }
 
-          // Sort categories by entry count descending (most used first)
           final sortedUsedCategories = categoryCounts.keys.toList()
             ..sort((a, b) {
               final countA = categoryCounts[a] ?? 0;
@@ -220,7 +222,6 @@ class _HomeScreenState extends State<HomeScreen> {
               return a.compareTo(b);
             });
 
-          // 'All' is ALWAYS first, followed only by categories with entries
           final availableCategories = ['All', ...sortedUsedCategories];
 
           List<Expense> displayedExpenses = filteredExpenses;
@@ -231,7 +232,8 @@ class _HomeScreenState extends State<HomeScreen> {
             if (match) {
               displayedExpenses = filteredExpenses.where((e) {
                 final cat = e.category ?? '';
-                return cat.toLowerCase() == _selectedCategoryFilter.toLowerCase();
+                return cat.toLowerCase() ==
+                    _selectedCategoryFilter.toLowerCase();
               }).toList();
             }
           }
@@ -254,24 +256,40 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     child: SizedBox(
                       height: 38,
                       child: ListView(
                         scrollDirection: Axis.horizontal,
                         children: availableCategories.map((cat) {
-                          final isSelected = cat.toLowerCase() == _selectedCategoryFilter.toLowerCase();
+                          final isSelected = cat.toLowerCase() ==
+                              _selectedCategoryFilter.toLowerCase();
                           return Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: FilterChip(
                               label: Text(cat),
                               selected: isSelected,
-                              selectedColor: AppColors.highlight.withValues(alpha: 0.2),
-                              checkmarkColor: AppColors.highlight,
+                              selectedColor:
+                                  AppColors.primary.withValues(alpha: 0.16),
+                              checkmarkColor: AppColors.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                side: BorderSide(
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : AppColors.primaryText
+                                          .withValues(alpha: 0.10),
+                                ),
+                              ),
                               labelStyle: TextStyle(
                                 fontSize: 12,
-                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                color: isSelected ? AppColors.highlight : AppColors.primaryText,
+                                fontWeight: isSelected
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : AppColors.primaryText,
                               ),
                               onSelected: (_) {
                                 setState(() => _selectedCategoryFilter = cat);
@@ -295,16 +313,17 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? 'No transactions yet'
                               : 'No transactions in this period',
                           message: expenses.isEmpty
-                              ? 'Tap add to record income or an expense'
+                              ? 'Tap + to record income, expenses, or money with contacts'
                               : 'Select another month or All Time to view your transactions',
                           action: SizedBox(
-                            width: 176,
+                            width: 196,
                             child: GlassButton(
                               onPressed: expenses.isEmpty
-                                  ? _navigateAndAddCashFlow
+                                  ? () => _navigateAndAddTransaction()
                                   : () => setState(
-                                      () => _selectedPeriod = allExpensePeriods,
-                                    ),
+                                        () =>
+                                            _selectedPeriod = allExpensePeriods,
+                                      ),
                               child: Text(
                                 expenses.isEmpty
                                     ? 'Add transaction'
@@ -347,10 +366,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     }, childCount: displayedExpenses.length),
                   ),
-                // Add bottom padding to account for FAB and bottom nav bar
                 SliverToBoxAdapter(
                   child: SizedBox(
-                    height: MediaQuery.of(context).padding.bottom + 88,
+                    height: MediaQuery.of(context).padding.bottom + 92,
                   ),
                 ),
               ],
@@ -400,16 +418,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ...periods.map(_buildPeriodMenuItem),
         ],
         child: Container(
-          constraints: const BoxConstraints(minHeight: 42),
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+          constraints: const BoxConstraints(minHeight: 40),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
             color: AppColors.glassNav,
             borderRadius: BorderRadius.circular(AppRadius.pill),
             border: Border.all(color: AppColors.glassCardBorder),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.10),
-                blurRadius: 12,
+                color: AppColors.primary.withValues(alpha: 0.12),
+                blurRadius: 14,
                 offset: const Offset(0, 5),
               ),
             ],
@@ -419,13 +437,17 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const Icon(
                 Icons.calendar_month_rounded,
-                size: 18,
-                color: AppColors.highlight,
+                size: 17,
+                color: AppColors.primary,
               ),
               const SizedBox(width: 6),
-              Text(
-                expensePeriodLabel(_selectedPeriod, compact: true),
-                style: Theme.of(context).textTheme.labelLarge,
+              Flexible(
+                child: Text(
+                  expensePeriodLabel(_selectedPeriod, compact: true),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
               ),
               const SizedBox(width: 2),
               const Icon(Icons.arrow_drop_down_rounded, size: 20),
@@ -447,7 +469,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? Icons.check_circle_rounded
                 : Icons.calendar_today_rounded,
             size: 19,
-            color: isSelected ? AppColors.highlight : AppColors.secondaryText,
+            color: isSelected ? AppColors.primary : AppColors.secondaryText,
           ),
           const SizedBox(width: AppSpacing.sm),
           Text(
@@ -529,9 +551,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 pressedScale: 0.94,
                 hoverScale: 1.025,
                 child: FloatingActionButton(
-                  onPressed: _navigateAndAddCashFlow,
-                  tooltip: 'Add income or expense',
-                  child: const Icon(Icons.add_rounded, size: 26),
+                  onPressed: () => _navigateAndAddTransaction(),
+                  tooltip: 'Add transaction',
+                  child: const Icon(Icons.add_rounded, size: 28),
                 ),
               )
             : null,

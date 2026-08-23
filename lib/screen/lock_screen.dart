@@ -42,6 +42,8 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin, 
   bool _isWrongPin = false;
   bool _isVerifyingPin = false;
   bool _hasAutoPromptedBiometrics = false;
+  bool _isAuthenticating = false;
+  bool _wasBackgrounded = false;
   PinAttemptState? _pinAttemptState;
   Timer? _lockoutTimer;
 
@@ -69,12 +71,19 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin, 
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      if (!_isSetupMode &&
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      if (!_isAuthenticating) {
+        _wasBackgrounded = true;
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (_wasBackgrounded &&
+          !_isAuthenticating &&
+          !_isSetupMode &&
           _canCheckBiometrics &&
           widget.settingsRepository.isBiometricEnabled &&
           !widget.settingsRepository.preferPinOverBiometric &&
           !_isPinLocked) {
+        _wasBackgrounded = false;
         _hasAutoPromptedBiometrics = true;
         unawaited(_authenticateWithBiometrics());
       }
@@ -162,7 +171,8 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin, 
         widget.settingsRepository.isBiometricEnabled &&
         !widget.settingsRepository.preferPinOverBiometric &&
         !_isPinLocked &&
-        !_hasAutoPromptedBiometrics) {
+        !_hasAutoPromptedBiometrics &&
+        !_isAuthenticating) {
       _hasAutoPromptedBiometrics = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -177,7 +187,8 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin, 
   }
 
   Future<void> _authenticateWithBiometrics() async {
-    if (_isPinLocked) return;
+    if (_isPinLocked || _isAuthenticating) return;
+    _isAuthenticating = true;
     unawaited(HapticFeedback.lightImpact());
     try {
       final authenticated = await _localAuth.authenticate(
@@ -219,6 +230,8 @@ class _LockScreenState extends State<LockScreen> with TickerProviderStateMixin, 
               'Biometric authentication could not be completed. Use your app PIN.',
         );
       }
+    } finally {
+      _isAuthenticating = false;
     }
   }
 

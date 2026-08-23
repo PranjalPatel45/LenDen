@@ -344,9 +344,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: const Text('Cancel'),
                       ),
                       FilledButton(
-                        onPressed: isVerifying
-                            ? null
-                            : () => unawaited(verify()),
+                        onPressed: isVerifying ? null : () => unawaited(verify()),
                         child: const Text('Verify and Disable'),
                       ),
                     ],
@@ -374,9 +372,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               maxWidth: 620,
               child: ListView(
                 shrinkWrap: true,
+                padding: const EdgeInsets.only(bottom: 24),
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 18),
+                    padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -394,8 +393,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     final isSelected = currency.code == _currencyCode;
                     return ListTile(
                       leading: Container(
-                        width: 42,
-                        height: 42,
+                        width: 44,
+                        height: 44,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
@@ -405,15 +404,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           currency.symbol,
                           style: const TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
-                      title: Text('${currency.name} (${currency.code})'),
+                      title: Text(
+                        '${currency.name} (${currency.code})',
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
                       trailing: isSelected
                           ? const Icon(
                               Icons.check_circle_rounded,
                               color: AppColors.lendColorDark,
+                              size: 22,
                             )
                           : null,
                       onTap: () async {
@@ -426,7 +430,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           if (context.mounted) {
                             AppSnackbar.showError(
                               context: context,
-                              message: 'Failed to change currency. Please try again.',
+                              message:
+                                  'Failed to change currency. Please try again.',
                             );
                           }
                           return;
@@ -461,204 +466,233 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         return ResponsiveContent(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 22, 16, 28),
-        children: [
-          const SectionLabel(label: 'Security', icon: Icons.shield_rounded),
-          const SizedBox(height: 8),
-          GlassCard(
-            radius: 16,
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Column(
-              children: [
-                SwitchListTile(
-                  title: const Text('App Lock (PIN)'),
-                  subtitle: Text(_hasPin ? 'PIN is set' : 'No PIN set'),
-                  value: _hasPin,
-                  onChanged: (value) {
-                    if (value) {
-                      unawaited(_changePin());
-                    } else {
-                      unawaited(_removePin());
-                    }
-                  },
-                ),
-                if (_hasPin)
-                  ListTile(
-                    leading: const GlassIcon(icon: Icons.quiz_outlined),
-                    title: const Text('Recovery Questions'),
-                    subtitle: Text(
-                      _hasRecoveryQuestions
-                          ? 'Configured — tap to update'
-                          : 'Not configured',
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+            children: [
+              const SectionLabel(label: 'Security', icon: Icons.shield_rounded),
+              const SizedBox(height: 8),
+              GlassCard(
+                radius: 20,
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Column(
+                  children: [
+                    SwitchListTile(
+                      title: const Text(
+                        'App Lock (PIN)',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      subtitle: Text(_hasPin ? 'PIN is set' : 'No PIN set'),
+                      value: _hasPin,
+                      onChanged: (value) {
+                        if (value) {
+                          unawaited(_changePin());
+                        } else {
+                          unawaited(_removePin());
+                        }
+                      },
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: _manageRecoveryQuestions,
+                    if (_hasPin)
+                      ListTile(
+                        leading:
+                            const GlassIcon(icon: Icons.quiz_outlined),
+                        title: const Text('Recovery Questions'),
+                        subtitle: Text(
+                          _hasRecoveryQuestions
+                              ? 'Configured — tap to update'
+                              : 'Not configured',
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: _manageRecoveryQuestions,
+                      ),
+                    if (_canCheckBiometrics)
+                      SwitchListTile(
+                        secondary: const GlassIcon(
+                            icon: Icons.fingerprint_rounded),
+                        title: const Text(
+                          'Biometric Unlock',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        subtitle: Text(
+                          !_hasPin
+                              ? 'Set a PIN to enable biometric unlock'
+                              : (widget.settingsRepository.isBiometricEnabled
+                                  ? 'Unlock app with biometrics'
+                                  : 'Biometric unlock disabled'),
+                        ),
+                        value: _hasPin &&
+                            widget.settingsRepository.isBiometricEnabled,
+                        onChanged: !_hasPin
+                            ? null
+                            : (value) async {
+                                await widget.settingsRepository
+                                    .setBiometricEnabled(value);
+                                if (mounted) setState(() {});
+                              },
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+              const SectionLabel(
+                  label: 'Categories', icon: Icons.category_rounded),
+              const SizedBox(height: 8),
+              GlassCard(
+                radius: 20,
+                child: ListTile(
+                  leading: const GlassIcon(
+                    icon: Icons.edit_note_rounded,
+                    color: AppColors.primary,
                   ),
-                if (_canCheckBiometrics)
-                  SwitchListTile(
-                    secondary: const GlassIcon(icon: Icons.fingerprint_rounded),
-                    title: const Text('Biometric Unlock'),
-                    subtitle: Text(
-                      !_hasPin
-                          ? 'Set a PIN to enable biometric unlock'
-                          : (widget.settingsRepository.isBiometricEnabled
-                              ? 'Unlock app with biometrics'
-                              : 'Biometric unlock disabled'),
+                  title: const Text(
+                    'Manage Categories',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  subtitle: Text(
+                    '${widget.settingsRepository.categories.length} categories — tap to manage',
+                    style: TextStyle(
+                      color: AppColors.secondaryText,
+                      fontSize: 13,
                     ),
-                    value: _hasPin && widget.settingsRepository.isBiometricEnabled,
-                    onChanged: !_hasPin
-                        ? null
-                        : (value) async {
-                            await widget.settingsRepository.setBiometricEnabled(value);
-                            if (mounted) setState(() {});
-                          },
                   ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 30),
-          const SectionLabel(label: 'Categories', icon: Icons.category_rounded),
-          const SizedBox(height: 8),
-          GlassCard(
-            radius: 16,
-            child: ListTile(
-              leading: const GlassIcon(
-                icon: Icons.edit_note_rounded,
-                color: AppColors.highlight,
-              ),
-              title: const Text('Manage Categories'),
-              subtitle: Text(
-                '${widget.settingsRepository.categories.length} categories — tap to add, edit, or delete',
-                style: TextStyle(
-                  color: AppColors.primaryText.withValues(alpha: 0.6),
-                  fontSize: 13,
-                ),
-              ),
-              trailing: const Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.grey,
-              ),
-              onTap: _navigateToManageCategories,
-            ),
-          ),
-          const SizedBox(height: 30),
-          const SectionLabel(label: 'Currency', icon: Icons.payments_rounded),
-          const SizedBox(height: 8),
-          GlassCard(
-            radius: 16,
-            child: ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: AppColors.highlight.withValues(alpha: 0.12),
-                ),
-                child: Text(
-                  _currencySymbol,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              title: Text(
-                '$_currencyName ($_currencyCode)',
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                'Tap to change currency',
-                style: TextStyle(
-                  color: AppColors.primaryText.withValues(alpha: 0.6),
-                  fontSize: 13,
-                ),
-              ),
-              trailing: const Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.grey,
-              ),
-              onTap: _showCurrencyPicker,
-            ),
-          ),
-          const SizedBox(height: 30),
-          const SectionLabel(label: 'Data & Export', icon: Icons.ios_share_rounded),
-          const SizedBox(height: 8),
-          GlassCard(
-            radius: 16,
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const GlassIcon(
-                    icon: Icons.table_chart_outlined,
-                    color: AppColors.highlight,
-                  ),
-                  title: const Text('Export Report (CSV)'),
-                  subtitle: const Text('Copy CSV statement to clipboard'),
                   trailing: const Icon(
                     Icons.chevron_right_rounded,
                     color: AppColors.grey,
                   ),
-                  onTap: _exportCsv,
+                  onTap: _navigateToManageCategories,
                 ),
-                ListTile(
-                  leading: const GlassIcon(
-                    icon: Icons.cloud_upload_outlined,
-                    color: AppColors.lendColorDark,
+              ),
+              const SizedBox(height: 28),
+              const SectionLabel(
+                  label: 'Currency', icon: Icons.payments_rounded),
+              const SizedBox(height: 8),
+              GlassCard(
+                radius: 20,
+                child: ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: AppColors.primary.withValues(alpha: 0.12),
+                    ),
+                    child: Text(
+                      _currencySymbol,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ),
-                  title: const Text('Backup Data (JSON)'),
-                  subtitle: const Text('Copy database backup to clipboard'),
+                  title: Text(
+                    '$_currencyName ($_currencyCode)',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  subtitle: const Text('Tap to change app currency'),
                   trailing: const Icon(
                     Icons.chevron_right_rounded,
                     color: AppColors.grey,
                   ),
-                  onTap: _backupJson,
+                  onTap: _showCurrencyPicker,
                 ),
-                ListTile(
-                  leading: const GlassIcon(
-                    icon: Icons.cloud_download_outlined,
-                    color: AppColors.borrowedColorDark,
-                  ),
-                  title: const Text('Restore Data'),
-                  subtitle: const Text('Import transactions from JSON backup'),
-                  trailing: const Icon(
-                    Icons.chevron_right_rounded,
-                    color: AppColors.grey,
-                  ),
-                  onTap: _restoreJson,
+              ),
+              const SizedBox(height: 28),
+              const SectionLabel(
+                  label: 'Data & Export', icon: Icons.ios_share_rounded),
+              const SizedBox(height: 8),
+              GlassCard(
+                radius: 20,
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const GlassIcon(
+                        icon: Icons.table_chart_outlined,
+                        color: AppColors.primary,
+                      ),
+                      title: const Text(
+                        'Export Statement (CSV)',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      subtitle: const Text('Copy CSV statement to clipboard'),
+                      trailing: const Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppColors.grey,
+                      ),
+                      onTap: _exportCsv,
+                    ),
+                    ListTile(
+                      leading: const GlassIcon(
+                        icon: Icons.cloud_upload_outlined,
+                        color: AppColors.lendColorDark,
+                      ),
+                      title: const Text(
+                        'Backup Data (JSON)',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      subtitle:
+                          const Text('Copy database backup to clipboard'),
+                      trailing: const Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppColors.grey,
+                      ),
+                      onTap: _backupJson,
+                    ),
+                    ListTile(
+                      leading: const GlassIcon(
+                        icon: Icons.cloud_download_outlined,
+                        color: AppColors.borrowedColorDark,
+                      ),
+                      title: const Text(
+                        'Restore Data',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      subtitle:
+                          const Text('Import transactions from JSON backup'),
+                      trailing: const Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppColors.grey,
+                      ),
+                      onTap: _restoreJson,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 28),
+              const SectionLabel(label: 'About', icon: Icons.info_rounded),
+              const SizedBox(height: 8),
+              GlassCard(
+                radius: 20,
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading:
+                          const GlassIcon(icon: Icons.info_outline_rounded),
+                      title: const Text(
+                        'Version',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      subtitle: const Text('1.0.0'),
+                    ),
+                    ListTile(
+                      leading: const GlassIcon(
+                        icon: Icons.code_rounded,
+                        color: AppColors.accent,
+                      ),
+                      title: const Text(
+                        'LenDen Personal Finance',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      subtitle: const Text('Flutter Mobile App'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 30),
-          const SectionLabel(label: 'About', icon: Icons.info_rounded),
-          const SizedBox(height: 8),
-          GlassCard(
-            radius: 16,
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const GlassIcon(icon: Icons.info_outline_rounded),
-                  title: const Text('Version'),
-                  subtitle: const Text('1.0.0'),
-                ),
-                ListTile(
-                  leading: const GlassIcon(
-                    icon: Icons.code_rounded,
-                    color: AppColors.accent,
-                  ),
-                  title: const Text('Developer'),
-                  subtitle: const Text('Flutter Developer'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
-  },
-);
-}
+  }
 
   String get _currencyName {
     for (var c in supportedCurrencies) {

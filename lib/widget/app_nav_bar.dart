@@ -6,50 +6,59 @@ import '../utils/app_colors.dart';
 import '../utils/app_design.dart';
 import '../utils/app_motion.dart';
 
-/// A restrained floating navigation surface. The glass is concentrated here
-/// because navigation benefits from remaining visually separate from content.
+/// Floating Light Liquid-Glass Navigation Bar
 class AppNavBar extends StatelessWidget {
-  const AppNavBar({super.key, required this.currentIndex, required this.onTap});
+  const AppNavBar({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+  });
 
   final int currentIndex;
   final ValueChanged<int> onTap;
 
   static const _items = [
-    (Icons.home_rounded, 'Home'),
-    (Icons.people_rounded, 'Connect'),
-    (Icons.settings_rounded, 'Settings'),
+    (Icons.space_dashboard_rounded, 'Dashboard'),
+    (Icons.people_alt_rounded, 'Connect'),
+    (Icons.tune_rounded, 'Settings'),
   ];
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
-      minimum: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+      minimum: const EdgeInsets.fromLTRB(20, 6, 20, 10),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryText.withValues(alpha: 0.09),
-              blurRadius: 20,
+              color: AppColors.primary.withValues(alpha: 0.12),
+              blurRadius: 24,
               offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: AppColors.primaryText.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(28),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: AppColors.glassNav,
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(28),
                 border: Border.all(
-                  color: AppColors.white.withValues(alpha: 0.78),
+                  color: AppColors.white.withValues(alpha: 0.95),
+                  width: 1.2,
                 ),
               ),
               child: SizedBox(
-                height: 64,
+                height: 66,
                 child: Row(
                   children: List.generate(
                     _items.length,
@@ -75,13 +84,13 @@ class AppNavBar extends StatelessWidget {
       child: Tooltip(
         message: label,
         child: PressScale(
-          pressedScale: 0.96,
+          pressedScale: 0.95,
           child: InkWell(
             onTap: () => onTap(index),
-            borderRadius: BorderRadius.circular(18),
-            splashColor: AppColors.highlight.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(22),
+            splashColor: AppColors.primary.withValues(alpha: 0.08),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
               child: AnimatedContainer(
                 duration: motionDuration(
                   context,
@@ -90,9 +99,14 @@ class AppNavBar extends StatelessWidget {
                 curve: Curves.easeOutCubic,
                 decoration: BoxDecoration(
                   color: selected
-                      ? AppColors.highlight.withValues(alpha: 0.11)
+                      ? AppColors.primary.withValues(alpha: 0.12)
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
+                  border: selected
+                      ? Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.18),
+                        )
+                      : null,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -100,9 +114,8 @@ class AppNavBar extends StatelessWidget {
                     Icon(
                       icon,
                       size: 22,
-                      color: selected
-                          ? AppColors.highlight
-                          : AppColors.secondaryText,
+                      color:
+                          selected ? AppColors.primary : AppColors.secondaryText,
                     ),
                     const SizedBox(height: 3),
                     AnimatedDefaultTextStyle(
@@ -111,14 +124,13 @@ class AppNavBar extends StatelessWidget {
                         AppMotion.quick,
                       ),
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 11.5,
                         height: 1,
-                        fontWeight: selected
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                        color: selected
-                            ? AppColors.highlight
-                            : AppColors.secondaryText,
+                        fontWeight:
+                            selected ? FontWeight.w800 : FontWeight.w600,
+                        color:
+                            selected ? AppColors.primary : AppColors.secondaryText,
+                        letterSpacing: 0.1,
                       ),
                       child: Text(label),
                     ),

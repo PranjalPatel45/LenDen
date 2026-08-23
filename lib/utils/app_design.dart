@@ -34,8 +34,7 @@ abstract final class AppMotion {
   static const Curve routeCurve = Curves.easeOutCubic;
 }
 
-/// Lightweight branded background. It uses layered palette tints without a
-/// full-screen blur, keeping scrolling and animation inexpensive.
+/// Lightweight branded background with soft multi-point color tints.
 class AppBackground extends StatelessWidget {
   const AppBackground({super.key, required this.child});
 
@@ -44,14 +43,14 @@ class AppBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          stops: const [0.0, 0.45, 1.0],
+          stops: [0.0, 0.45, 1.0],
           colors: [
             AppColors.background,
-            AppColors.primary.withValues(alpha: 0.06),
+            Color(0xFFEFF6FF), // Soft Powder Tint
             AppColors.background,
           ],
         ),
@@ -61,8 +60,7 @@ class AppBackground extends StatelessWidget {
   }
 }
 
-/// Keeps phone layouts unchanged while preventing forms and lists from
-/// stretching excessively on tablets and landscape screens.
+/// Prevents forms and lists from stretching excessively on tablet/desktop widths.
 class ResponsiveContent extends StatelessWidget {
   const ResponsiveContent({
     super.key,
@@ -98,16 +96,17 @@ class SectionLabel extends StatelessWidget {
     return Row(
       children: [
         if (icon != null) ...[
-          Icon(icon, size: 18, color: AppColors.highlight),
+          Icon(icon, size: 18, color: AppColors.primary),
           const SizedBox(width: AppSpacing.xs),
         ],
         Text(
-          label,
+          label.toUpperCase(),
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: AppColors.secondaryText,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.15,
-          ),
+                color: AppColors.secondaryText,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.6,
+                fontSize: 11,
+              ),
         ),
       ],
     );
@@ -118,7 +117,7 @@ class GlassIcon extends StatelessWidget {
   const GlassIcon({
     super.key,
     required this.icon,
-    this.color = AppColors.highlight,
+    this.color = AppColors.primary,
     this.size = 20,
   });
 
@@ -132,8 +131,8 @@ class GlassIcon extends StatelessWidget {
       width: 38,
       height: 38,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(11),
-        color: color.withValues(alpha: 0.11),
+        borderRadius: BorderRadius.circular(12),
+        color: color.withValues(alpha: 0.12),
       ),
       alignment: Alignment.center,
       child: Icon(icon, color: color, size: size),

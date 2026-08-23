@@ -3,15 +3,16 @@ import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_design.dart';
 import '../utils/app_motion.dart';
+import '../utils/transaction_type.dart';
 
-/// Shared type selector used by both transaction forms.
+/// Shared type selector featuring visual segmented pill buttons.
 class ExpenseTypeField extends StatelessWidget {
   const ExpenseTypeField({
     super.key,
     required this.selectedType,
     required this.onChanged,
     this.fieldLabel = 'Transaction Type',
-    this.types = const ['Lent', 'Borrowed'],
+    this.types = const ['Income', 'Expense', 'Lent', 'Borrowed'],
     this.itemTextColor = AppColors.primaryText,
   });
 
@@ -21,66 +22,102 @@ class ExpenseTypeField extends StatelessWidget {
   final List<String> types;
   final Color itemTextColor;
 
+  Color _colorForType(String type) {
+    switch (type) {
+      case TransactionType.income:
+        return AppColors.lendColorDark;
+      case TransactionType.expense:
+        return AppColors.borrowColorDark;
+      case TransactionType.lent:
+        return AppColors.primary;
+      case TransactionType.borrowed:
+        return AppColors.borrowedColorDark;
+      default:
+        return AppColors.primary;
+    }
+  }
+
+  IconData _iconForType(String type) {
+    switch (type) {
+      case TransactionType.income:
+        return Icons.trending_up_rounded;
+      case TransactionType.expense:
+        return Icons.trending_down_rounded;
+      case TransactionType.lent:
+        return Icons.north_east_rounded;
+      case TransactionType.borrowed:
+        return Icons.south_west_rounded;
+      default:
+        return Icons.swap_horiz_rounded;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final fieldWidget = FocusMotion(
-      builder: (context, focused, duration) => AnimatedContainer(
-        duration: duration,
-        curve: Curves.easeOutCubic,
-        width: double.infinity,
-        height: AppSize.fieldHeight,
-        decoration: BoxDecoration(
-          color: AppColors.glassInputFill,
-          borderRadius: BorderRadius.circular(AppRadius.input),
-          border: Border.all(
-            color: focused
-                ? AppColors.highlight.withValues(alpha: 0.72)
-                : AppColors.glassCardBorder,
-            width: focused ? 1.5 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: focused
-                  ? AppColors.highlight.withValues(alpha: 0.14)
-                  : AppColors.primary.withValues(alpha: 0.07),
-              blurRadius: focused ? 16 : 12,
-              offset: const Offset(0, 5),
-            ),
-          ],
+    final segmentWidget = Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.primaryText.withValues(alpha: 0.10),
         ),
-        child: LayoutBuilder(
-          builder: (context, constraints) => DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: selectedType,
-              isExpanded: true,
-              menuWidth: constraints.maxWidth,
-              itemHeight: AppSize.fieldHeight,
-              borderRadius: BorderRadius.circular(AppRadius.input),
-              dropdownColor: AppColors.cardSurface,
-              icon: const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: AppColors.secondaryText,
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              hint: const _SelectedTypeContent(label: 'Select type'),
-              selectedItemBuilder: (context) => types
-                  .map((label) => _SelectedTypeContent(label: label))
-                  .toList(growable: false),
-              items: types
-                  .map(
-                    (label) => DropdownMenuItem(
-                      value: label,
-                      child: Text(
-                        label,
-                        style: TextStyle(fontSize: 16, color: itemTextColor),
+      ),
+      child: Wrap(
+        spacing: 4,
+        runSpacing: 4,
+        children: types.map((type) {
+          final isSelected = selectedType == type;
+          final typeColor = _colorForType(type);
+          final icon = _iconForType(type);
+
+          return PressScale(
+            pressedScale: 0.96,
+            child: InkWell(
+              onTap: () => onChanged(type),
+              borderRadius: BorderRadius.circular(16),
+              child: AnimatedContainer(
+                duration: AppMotion.quick,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? typeColor.withValues(alpha: 0.14)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                  border: isSelected
+                      ? Border.all(
+                          color: typeColor.withValues(alpha: 0.35),
+                          width: 1.5,
+                        )
+                      : null,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 16,
+                      color: isSelected ? typeColor : AppColors.secondaryText,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      type,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight:
+                            isSelected ? FontWeight.w800 : FontWeight.w600,
+                        color:
+                            isSelected ? typeColor : AppColors.secondaryText,
                       ),
                     ),
-                  )
-                  .toList(growable: false),
-              onChanged: onChanged,
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        }).toList(),
       ),
     );
 
@@ -96,43 +133,16 @@ class ExpenseTypeField extends StatelessWidget {
               style: const TextStyle(
                 color: AppColors.primaryText,
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.1,
               ),
             ),
           ),
-          fieldWidget,
+          segmentWidget,
         ],
       );
     }
 
-    return fieldWidget;
-  }
-}
-
-class _SelectedTypeContent extends StatelessWidget {
-  const _SelectedTypeContent({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Icon(
-          Icons.swap_horiz_rounded,
-          size: 22,
-          color: AppColors.primaryText,
-        ),
-        const SizedBox(width: 12),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: label == 'Type' ? 14 : 16,
-            color: AppColors.primaryText,
-          ),
-        ),
-      ],
-    );
+    return segmentWidget;
   }
 }
