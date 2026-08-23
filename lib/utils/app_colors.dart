@@ -26,7 +26,6 @@ class AppColors {
   static const Color softBlue = Color(0xFF93C5FD);
   static const Color softLavender = Color(0xFFEEF2FF);
   static const Color softPeach = Color(0xFFFED7AA);
-  static const Color softMint = Color(0xFFD1FAE5);
 
   // Status & Utility Colors
   static const Color success = Color(0xFF059669);

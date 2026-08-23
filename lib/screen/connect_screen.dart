@@ -2,17 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
-import 'package:to_do/data/expense_repository.dart';
-import 'package:to_do/data/settings_repository.dart';
-import 'package:to_do/model/expense_model.dart';
-import 'package:to_do/utils/currency_helper.dart';
-import 'package:to_do/utils/transaction_type.dart';
-import 'contact_detail_screen.dart';
-
+import '../data/expense_repository.dart';
+import '../data/settings_repository.dart';
+import '../model/expense_model.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_design.dart';
 import '../utils/app_transitions.dart';
+import '../utils/currency_helper.dart';
+import '../utils/transaction_type.dart';
 import '../widget/glass_widgets.dart';
+import 'contact_detail_screen.dart';
 
 class ConnectScreen extends StatefulWidget {
   const ConnectScreen({

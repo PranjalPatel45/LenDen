@@ -1,27 +1,26 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:to_do/data/expense_repository.dart';
-import 'package:to_do/data/settings_repository.dart';
-import 'package:to_do/model/expense_model.dart';
-import 'package:to_do/widget/app_nav_bar.dart';
-import 'package:to_do/widget/glass_widgets.dart';
-
-import '../widget/expense_summary_card.dart';
-import '../widget/expense_tile.dart';
+import '../data/expense_repository.dart';
+import '../data/settings_repository.dart';
+import '../model/expense_model.dart';
 import '../utils/app_colors.dart';
-import '../utils/app_snackbar.dart';
 import '../utils/app_design.dart';
 import '../utils/app_motion.dart';
-import '../utils/expense_period.dart';
-import '../utils/delete_restore.dart';
-import '../utils/transaction_type.dart';
-import '../utils/glass_toast.dart';
+import '../utils/app_snackbar.dart';
 import '../utils/app_transitions.dart';
-import 'form_screen.dart';
-import 'edit_expense_screen.dart';
+import '../utils/delete_restore.dart';
+import '../utils/expense_period.dart';
+import '../utils/glass_toast.dart';
+import '../utils/transaction_type.dart';
+import '../widget/app_nav_bar.dart';
+import '../widget/expense_summary_card.dart';
+import '../widget/expense_tile.dart';
+import '../widget/glass_widgets.dart';
 import 'connect_screen.dart';
 import 'contact_detail_screen.dart';
+import 'edit_expense_screen.dart';
+import 'form_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {

@@ -2,16 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:to_do/config/app_security_config.dart';
-import 'package:to_do/data/expense_repository.dart';
-import 'package:to_do/data/security_repository.dart';
-import 'package:to_do/data/settings_repository.dart';
-import 'package:to_do/screen/lock_screen.dart';
-import 'package:to_do/screen/splash_screen.dart';
-import 'package:to_do/utils/app_colors.dart';
-import 'package:to_do/utils/screen_security.dart';
-
+import 'config/app_security_config.dart';
+import 'data/expense_repository.dart';
+import 'data/security_repository.dart';
+import 'data/settings_repository.dart';
 import 'model/expense_model.dart';
+import 'screen/lock_screen.dart';
+import 'screen/splash_screen.dart';
+import 'utils/app_colors.dart';
+import 'utils/screen_security.dart';
 
 const SecurityRepository securityRepository = SecurityRepository();
 

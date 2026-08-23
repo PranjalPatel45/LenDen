@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:to_do/model/expense_model.dart';
-import 'package:to_do/utils/category_helper.dart';
-import 'package:to_do/utils/currency_helper.dart';
-import 'package:to_do/utils/transaction_type.dart';
+import '../model/expense_model.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_design.dart';
 import '../utils/app_motion.dart';
+import '../utils/category_helper.dart';
+import '../utils/currency_helper.dart';
+import '../utils/transaction_type.dart';
 
 class TransactionSwipeTile extends StatefulWidget {
   const TransactionSwipeTile({

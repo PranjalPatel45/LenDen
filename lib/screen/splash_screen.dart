@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../utils/app_colors.dart';
-import '../utils/app_design.dart';
-import '../utils/app_transitions.dart';
 import '../data/security_repository.dart';
 import '../data/settings_repository.dart';
+import '../utils/app_colors.dart';
+import '../utils/app_transitions.dart';
 import 'home_screen.dart';
 import 'lock_screen.dart';
 
@@ -99,7 +98,19 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AppBackground(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            stops: [0.0, 0.5, 1.0],
+            colors: [
+              Color(0xFFF8FAFC),
+              Color(0xFFEFF6FF),
+              Color(0xFFE0F2FE),
+            ],
+          ),
+        ),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -139,9 +150,9 @@ class _SplashScreenState extends State<SplashScreen>
                                 boxShadow: [
                                   BoxShadow(
                                     color: AppColors.highlight.withValues(
-                                      alpha: 0.22,
+                                      alpha: 0.35,
                                     ),
-                                    blurRadius: 10,
+                                    blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
                                 ],
@@ -150,7 +161,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 value: _progress.value,
                                 minHeight: 6,
                                 borderRadius: BorderRadius.circular(10),
-                                backgroundColor: AppColors.primary.withValues(
+                                backgroundColor: AppColors.highlight.withValues(
                                   alpha: 0.16,
                                 ),
                                 color: AppColors.highlight,
@@ -202,7 +213,7 @@ class _LenDenMark extends StatelessWidget {
         border: Border.all(color: AppColors.white, width: 2.5),
         boxShadow: [
           BoxShadow(
-            color: AppColors.highlight.withValues(alpha: 0.2),
+            color: AppColors.highlight.withValues(alpha: 0.25),
             blurRadius: 32,
             offset: const Offset(0, 12),
           ),
@@ -210,7 +221,6 @@ class _LenDenMark extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Simplified static design for better performance
           Align(
             alignment: Alignment.topLeft,
             child: _DirectionBadge(
@@ -243,7 +253,7 @@ class _LenDenMark extends StatelessWidget {
             child: Icon(
               Icons.account_balance_wallet_rounded,
               size: 34,
-              color: AppColors.primaryText,
+              color: AppColors.primary,
             ),
           ),
         ],
@@ -264,7 +274,7 @@ class _DirectionBadge extends StatelessWidget {
       width: 39,
       height: 39,
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      child: Icon(icon, size: 21, color: AppColors.primaryText),
+      child: Icon(icon, size: 21, color: AppColors.white),
     );
   }
 }
@@ -276,13 +286,13 @@ class _BrandContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Brand name with gradient
+        // Bright radiant brand name gradient
         ShaderMask(
           shaderCallback: (bounds) {
-            return LinearGradient(
+            return const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [AppColors.primaryText, AppColors.highlight],
+              colors: [AppColors.primary, AppColors.highlight],
             ).createShader(bounds);
           },
           child: const Text(
@@ -298,7 +308,7 @@ class _BrandContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 13),
-        // Tagline
+        // Lighter subtitle text
         Text(
           'Track income, expenses, lending and borrowing.',
           textAlign: TextAlign.center,
@@ -306,11 +316,11 @@ class _BrandContent extends StatelessWidget {
             fontSize: 15,
             height: 1.35,
             fontWeight: FontWeight.w600,
-            color: AppColors.primaryText.withValues(alpha: 0.72),
+            color: AppColors.secondaryText,
           ),
         ),
         const SizedBox(height: 28),
-        // Type pills
+        // Light liquid-glass type pills
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 10,
@@ -331,13 +341,13 @@ class _BrandContent extends StatelessWidget {
             _TypePill(
               label: 'LENT',
               icon: Icons.north_east_rounded,
-              color: AppColors.highlight,
+              color: Color(0x1F3B82F6),
               iconColor: AppColors.highlight,
             ),
             _TypePill(
               label: 'BORROWED',
               icon: Icons.south_west_rounded,
-              color: AppColors.primary,
+              color: Color(0x1F2563EB),
               iconColor: AppColors.primary,
             ),
           ],
@@ -368,7 +378,7 @@ class _TypePill extends StatelessWidget {
         color: color,
         borderRadius: BorderRadius.circular(30),
         border: Border.all(
-          color: AppColors.primaryText.withValues(alpha: 0.08),
+          color: iconColor.withValues(alpha: 0.18),
         ),
       ),
       child: Row(
@@ -381,7 +391,7 @@ class _TypePill extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w800,
-              color: AppColors.primaryText,
+              color: iconColor,
               letterSpacing: 0.7,
             ),
           ),
