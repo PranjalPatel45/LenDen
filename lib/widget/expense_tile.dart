@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:to_do/model/expense_model.dart';
@@ -279,53 +278,47 @@ class _SwipeActionButton extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          child: Container(
+            height: 58,
+            constraints: const BoxConstraints(minWidth: 70),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadius.pill),
-              child: Container(
-                height: 58,
-                constraints: const BoxConstraints(minWidth: 70),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                  color: AppColors.white.withValues(alpha: 0.84),
-                  border: Border.all(
-                    color: color.withValues(alpha: 0.34),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.14),
-                      blurRadius: 14,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(icon, size: 18, color: color),
-                    const SizedBox(height: 3),
-                    Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
+              color: AppColors.white.withValues(alpha: 0.94),
+              border: Border.all(
+                color: color.withValues(alpha: 0.35),
+                width: 1,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.12),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 18, color: color),
+                const SizedBox(height: 3),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

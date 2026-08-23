@@ -101,7 +101,10 @@ abstract final class AppTransitions {
       transitionBuilder: (child, animation) {
         return FadeTransition(
           opacity: animation,
-          child: child,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.988, end: 1.0).animate(animation),
+            child: child,
+          ),
         );
       },
       child: KeyedSubtree(
