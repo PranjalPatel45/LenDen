@@ -12,7 +12,7 @@ class ExpenseTypeField extends StatelessWidget {
     required this.selectedType,
     required this.onChanged,
     this.fieldLabel = 'Transaction Type',
-    this.types = const ['Income', 'Expense', 'Lent', 'Borrowed'],
+    this.types = TransactionType.cashFlowTypes,
     this.itemTextColor = AppColors.primaryText,
   });
 

@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       AppTransitions.slideUp<Expense>(
         page: AddTodoScreen(
-          allowedTypes: allowedTypes ?? TransactionType.all,
+          allowedTypes: allowedTypes ?? TransactionType.cashFlowTypes,
           title: title ?? 'Add Transaction',
           settingsRepository: widget.settingsRepository,
         ),

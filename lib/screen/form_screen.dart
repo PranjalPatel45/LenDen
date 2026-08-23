@@ -19,7 +19,7 @@ class AddTodoScreen extends StatefulWidget {
     super.key,
     this.prefillContactName,
     this.prefillPhoneNumber,
-    this.allowedTypes = TransactionType.contactTypes,
+    this.allowedTypes = TransactionType.cashFlowTypes,
     this.title = 'Add Transaction',
     this.settingsRepository = const SettingsRepository(),
   });
@@ -61,7 +61,9 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
   }
 
   void _setDefaultType() {
-    _selectedType = widget.allowedTypes.first;
+    _selectedType = widget.allowedTypes.contains(TransactionType.expense)
+        ? TransactionType.expense
+        : widget.allowedTypes.first;
   }
 
   @override
