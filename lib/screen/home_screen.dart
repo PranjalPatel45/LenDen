@@ -255,30 +255,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
                     child: SizedBox(
                       height: 38,
                       child: ListView(
                         scrollDirection: Axis.horizontal,
                         children: availableCategories.map((cat) {
-                          final isSelected = cat.toLowerCase() ==
+                          final isSelected =
+                              cat.toLowerCase() ==
                               _selectedCategoryFilter.toLowerCase();
                           return Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: FilterChip(
                               label: Text(cat),
                               selected: isSelected,
-                              selectedColor:
-                                  AppColors.primary.withValues(alpha: 0.16),
+                              selectedColor: AppColors.primary.withValues(
+                                alpha: 0.16,
+                              ),
                               checkmarkColor: AppColors.primary,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 side: BorderSide(
                                   color: isSelected
                                       ? AppColors.primary
-                                      : AppColors.primaryText
-                                          .withValues(alpha: 0.10),
+                                      : AppColors.primaryText.withValues(
+                                          alpha: 0.10,
+                                        ),
                                 ),
                               ),
                               labelStyle: TextStyle(
@@ -320,9 +325,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               onPressed: expenses.isEmpty
                                   ? () => _navigateAndAddTransaction()
                                   : () => setState(
-                                        () =>
-                                            _selectedPeriod = allExpensePeriods,
-                                      ),
+                                      () => _selectedPeriod = allExpensePeriods,
+                                    ),
                               child: Text(
                                 expenses.isEmpty
                                     ? 'Add transaction'

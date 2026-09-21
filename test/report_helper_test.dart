@@ -3,6 +3,8 @@ import 'package:to_do/model/expense_model.dart';
 import 'package:to_do/utils/report_helper.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   final sampleExpenses = [
     Expense(
       title: 'Food',
@@ -30,17 +32,15 @@ void main() {
     });
   });
 
-  group('ReportHelper JSON Backup & Restore', () {
-    test('exports and parses json backup', () {
-      final jsonStr = ReportHelper.generateJsonBackup(sampleExpenses);
-      expect(jsonStr, contains('"title": "Food"'));
-      expect(jsonStr, contains('"contactName": "Alice"'));
-
-      final restored = ReportHelper.parseJsonBackup(jsonStr);
-      expect(restored, hasLength(2));
-      expect(restored.first.title, 'Food');
-      expect(restored.first.amount, 45.0);
-      expect(restored.last.contactName, 'Alice');
+  group('ReportHelper PDF', () {
+    test('generates non-empty pdf byte array', () async {
+      final pdfBytes = await ReportHelper.generatePdfReport(
+        sampleExpenses,
+        currencySymbol: '₹',
+        currencyCode: 'INR',
+      );
+      expect(pdfBytes, isNotEmpty);
+      expect(pdfBytes.sublist(0, 4), equals([0x25, 0x50, 0x44, 0x46]));
     });
   });
 }

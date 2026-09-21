@@ -1,8 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
 import '../data/expense_repository.dart';
 import '../data/security_repository.dart';
 import '../data/settings_repository.dart';
@@ -150,6 +155,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _exportPdf() async {
+    final repository = const ExpenseRepository();
+    final expenses = repository.getAll();
+    if (expenses.isEmpty) {
+      AppSnackbar.showError(
+        context: context,
+        message: 'No transactions to export.',
+      );
+      return;
+    }
+
+    try {
+      AppSnackbar.show(
+        context: context,
+        message: 'Generating PDF statement...',
+      );
+      final pdfBytes = await ReportHelper.generatePdfReport(
+        expenses,
+        currencySymbol: _currencySymbol,
+        currencyCode: _currencyCode,
+      );
+
+      final dateStr = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      await Printing.sharePdf(
+        bytes: pdfBytes,
+        filename: 'LenDen_Statement_$dateStr.pdf',
+      );
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.showError(
+          context: context,
+          message: 'Failed to generate PDF statement: $e',
+        );
+      }
+    }
+  }
+
   Future<void> _exportCsv() async {
     final repository = const ExpenseRepository();
     final expenses = repository.getAll();
@@ -160,103 +202,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
       return;
     }
-    final csv = ReportHelper.generateCsvReport(expenses);
-    await Clipboard.setData(ClipboardData(text: csv));
-    if (mounted) {
-      AppSnackbar.showSuccess(
-        context: context,
-        message: 'CSV report copied to clipboard!',
-      );
-    }
-  }
 
-  Future<void> _backupJson() async {
-    final repository = const ExpenseRepository();
-    final expenses = repository.getAll();
-    if (expenses.isEmpty) {
-      AppSnackbar.showError(
-        context: context,
-        message: 'No transactions to backup.',
-      );
-      return;
-    }
-    final jsonStr = ReportHelper.generateJsonBackup(expenses);
-    await Clipboard.setData(ClipboardData(text: jsonStr));
-    if (mounted) {
-      AppSnackbar.showSuccess(
-        context: context,
-        message: 'JSON backup copied to clipboard!',
-      );
-    }
-  }
+    try {
+      final csv = ReportHelper.generateCsvReport(expenses);
+      final tempDir = await getTemporaryDirectory();
+      final dateStr = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      final file = File('${tempDir.path}/LenDen_Statement_$dateStr.csv');
+      await file.writeAsString(csv);
 
-  Future<void> _restoreJson() async {
-    final controller = TextEditingController();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Restore Data'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Paste your JSON backup below:'),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              maxLines: 6,
-              decoration: const InputDecoration(
-                hintText: '[\n  {\n    "title": ...\n  }\n]',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'text/csv')],
+          text: 'LenDen Financial Statement (CSV)',
+          subject: 'LenDen Statement',
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Restore',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && controller.text.trim().isNotEmpty) {
-      try {
-        final restored = ReportHelper.parseJsonBackup(controller.text.trim());
-        if (restored.isEmpty) {
-          if (mounted) {
-            AppSnackbar.showError(
-              context: context,
-              message: 'Invalid or empty backup.',
-            );
-          }
-          return;
-        }
-        final repository = const ExpenseRepository();
-        for (final expense in restored) {
-          await repository.add(expense);
-        }
-        if (mounted) {
-          AppSnackbar.showSuccess(
-            context: context,
-            message: 'Restored ${restored.length} transactions!',
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          AppSnackbar.showError(
-            context: context,
-            message: 'Failed to parse JSON backup.',
-          );
-        }
+      );
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.showError(
+          context: context,
+          message: 'Failed to export CSV: $e',
+        );
       }
     }
   }
@@ -596,7 +562,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 28),
               const SectionLabel(
-                  label: 'Data & Export', icon: Icons.ios_share_rounded),
+                  label: 'Statements & Export', icon: Icons.ios_share_rounded),
               const SizedBox(height: 8),
               GlassCard(
                 radius: 20,
@@ -605,53 +571,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     ListTile(
                       leading: const GlassIcon(
-                        icon: Icons.table_chart_outlined,
+                        icon: Icons.picture_as_pdf_rounded,
                         color: AppColors.primary,
+                      ),
+                      title: const Text(
+                        'Export Statement (PDF)',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      subtitle:
+                          const Text('Generate formatted PDF report & share'),
+                      trailing: const Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppColors.grey,
+                      ),
+                      onTap: _exportPdf,
+                    ),
+                    ListTile(
+                      leading: const GlassIcon(
+                        icon: Icons.table_chart_rounded,
+                        color: AppColors.lendColorDark,
                       ),
                       title: const Text(
                         'Export Statement (CSV)',
                         style: TextStyle(fontWeight: FontWeight.w700),
                       ),
-                      subtitle: const Text('Copy CSV statement to clipboard'),
+                      subtitle:
+                          const Text('Export spreadsheet file (Excel/Sheets)'),
                       trailing: const Icon(
                         Icons.chevron_right_rounded,
                         color: AppColors.grey,
                       ),
                       onTap: _exportCsv,
-                    ),
-                    ListTile(
-                      leading: const GlassIcon(
-                        icon: Icons.cloud_upload_outlined,
-                        color: AppColors.lendColorDark,
-                      ),
-                      title: const Text(
-                        'Backup Data (JSON)',
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      subtitle:
-                          const Text('Copy database backup to clipboard'),
-                      trailing: const Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.grey,
-                      ),
-                      onTap: _backupJson,
-                    ),
-                    ListTile(
-                      leading: const GlassIcon(
-                        icon: Icons.cloud_download_outlined,
-                        color: AppColors.borrowedColorDark,
-                      ),
-                      title: const Text(
-                        'Restore Data',
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      subtitle:
-                          const Text('Import transactions from JSON backup'),
-                      trailing: const Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.grey,
-                      ),
-                      onTap: _restoreJson,
                     ),
                   ],
                 ),
